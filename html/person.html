@@ -1,0 +1,160 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>LayIM移动版测试</title>
+    <link rel="stylesheet" href="../layer/css/layui.mobile.css" media="all">
+    <link rel="stylesheet" href="../layer/css/modules/layim/mobile/layim.css?v=2.10" media="all">
+
+</head>
+<body>
+
+<div id="app">
+<div id="layui-m-layer1" class="layui-m-layer layui-m-layer1" index="1">
+    <div class="layui-m-layermain"><div class="layui-m-layersection"><div class="layui-m-layerchild  layui-m-anim--1"><div class="layui-m-layercont"><div class="layim-panel layui-m-anim-left"><div class="layim-title" style="background-color: #36373C;"><p><i class="layui-icon layim-chat-back" layim-event="back"></i>薛凌霄<span class="layim-chat-status"></span></p></div><div class="layui-unselect layim-content"><div class="layim-chat layim-chat-friend"><div class="layim-chat-main"><ul><li class="layim-chat-system"><span>08-06 00:51</span></li><li class="layim-chat-li layim-chat-mine"><div class="layim-chat-user"><img src="http://tp4.sinaimg.cn/1345566427/180/5730976522/0"><cite>向墨</cite></div><div class="layim-chat-text">几点睡呀</div></li><li class="layim-chat-li"><div class="layim-chat-user"><img src="https://huajialife.com/images/header2.jpg"><cite>薛凌霄</cite></div><div class="layim-chat-text">1点准备睡了</div></li>
+
+    <li v-for="(item,index) in list" class="layim-chat-li" v-bind:class="{'layim-chat-mine':(item.user_id == current_user_id)}">
+        <div class="layim-chat-user">
+            <img :src="current_user_avatar" v-if="item.user_id == current_user_id">
+            <img :src="user_avatar" v-else>
+        </div>
+        <div class="layim-chat-text">{{item.content}}</div>
+    </li>
+
+
+    </ul></div><div class="layim-chat-footer"><div class="layim-chat-send"><input type="text" autocomplete="off" v-model="send_content"><button class="layim-send" v-bind:class="{'layui-disabled':!send_content}" @click="sendMsg">发送</button></div><div class="layim-chat-tool" data-json="%7B%22username%22%3A%22%E8%96%9B%E5%87%8C%E9%9C%84%22%2C%22avatar%22%3A%22https%3A%2F%2Fhuajialife.com%2Fimages%2Fheader2.jpg%22%2C%22id%22%3A2%2C%22type%22%3A%22friend%22%2C%22content%22%3A%221%E7%82%B9%E5%87%86%E5%A4%87%E7%9D%A1%E4%BA%86%22%2C%22mine%22%3Afalse%2C%22timestamp%22%3A1565023914%2C%22name%22%3A%22%E8%96%9B%E5%87%8C%E9%9C%84%22%2C%22historyTime%22%3A1565023914087%2C%22sign%22%3A%221%E7%82%B9%E5%87%86%E5%A4%87%E7%9D%A1%E4%BA%86%22%7D"><span class="layui-icon layim-tool-face" title="选择表情" layim-event="face"></span></div></div></div></div></div></div></div></div></div>
+</div>
+</div>
+
+<script src="../layer/layui.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="../js/jquery.min.js"></script>
+<script src="https://underscorejs.net/underscore.js"></script>
+<script>
+
+    function getQueryString(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) return unescape(r[2]); return null;
+    }
+
+    new Vue(
+        {
+            el:'#app',
+            data:{
+                user_id:'',
+                current_user_id:'',
+                user_avatar:'',
+                current_user_avatar:'',
+                last_id:'',
+                list:[],
+                send_content:'',
+                host:'http://fs.cc'
+            },
+            created:function () {
+                this.user_id = getQueryString('user_id'),
+                this.current_user_id = getQueryString('current_user_id'),
+                this.user_avatar = getQueryString('user_avatar'),
+                this.current_user_avatar = getQueryString('current_user_avatar')
+
+                // console.log(this.user_id),
+                // console.log(this.current_user_id),
+                // console.log(this.user_avatar),
+                // console.log(this.current_user_avatar)
+            },
+            mounted:function(){
+                // alert(3);
+                setTimeout(this.newMessage, 3000);
+            },
+            methods:
+                {
+                    newMessage()
+                    {
+                        // console.log(2)
+                        var _self = this;
+                        var type = this.last_id?1:'';
+                        // 阻塞查询
+                        $.ajax(
+                            {
+                                'url':'http://fs.cc/api/chat_message',
+                                'type':'post',
+                                'data':{
+                                    user_id:this.user_id,
+                                    current_user_id:this.current_user_id,
+                                    user_avatar:this.user_avatar,
+                                    current_user_avatar:this.current_user_avatar,
+                                    msg_id:this.last_id,
+                                    type:type
+                                },
+                                'async':false,
+                                'dataType':'json',
+                                success:function(data)
+                                {
+                                    if( data.status )
+                                    {
+                                        if( type ) {
+                                            for (var i = data.data.data.length; i > 0; i--) {
+                                                _self.pushList(data.data.data[i - 1]);
+                                            }
+                                        }else
+                                        {
+                                            for (var i = 0,j = data.data.data.length; i < j; i++) {
+                                                _self.pushList(data.data.data[i]);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        );
+
+                        setTimeout(this.newMessage, 3000);
+                    },
+                    pushList(msgRecord)
+                    {
+                        this.list.push(msgRecord);
+                        if (this.last_id < msgRecord.id)
+                        {
+                            this.last_id = msgRecord.id
+                        }
+                    },
+                    sendMsg()
+                    {
+
+                        if( !this.send_content )
+                        {
+                            return;
+                        }
+
+                        var content = this.send_content;
+                        this.send_content = '';
+
+                        /*发送消息*/
+                        $.ajax(
+                            {
+                                url: this.host + '/api/send-chat',
+                                data:{
+                                    user_id:this.user_id,
+                                    current_user_id:this.current_user_id,
+                                    content:content
+                                },
+                                type:'post',
+                                dataType:'json',
+                                success:function(data)
+                                {
+                                    if( data.status )
+                                    {
+
+                                    }
+                                }
+                            }
+                        )
+                    }
+
+                }
+        }
+    )
+
+
+</script>
+</body>
+</html>

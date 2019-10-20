@@ -1,0 +1,286 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>LayIM移动版测试</title>
+    <link rel="stylesheet" href="../layer/css/layui.mobile.css" media="all">
+</head>
+<body>
+<script src="../layer/layui.js"></script>
+<script src="../js/jquery.min.js"></script>
+<script>
+
+
+    function getHeader()
+    {
+        return {
+            'Authorization':"Bearer " + pageConfig.token,
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    }
+
+    function getQueryString(name) {
+
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+
+        var r = window.location.search.substr(1).match(reg);
+
+        if (r != null) return unescape(r[2]); return null;
+
+    }
+
+
+
+    var pageConfig =
+        {
+        id:getQueryString('user_id'),
+        token:getQueryString('token'),
+        host:'http://106.14.140.53:9090'
+    }
+
+
+    //step2: 获得好友头像
+
+
+
+    //获得用户群组消息
+
+    //获得用户好友列表
+    // $.get('api/self/get_friend_lis','',function(){},'')
+
+    // $.ajax('api/self/get_friend_lis','',function(){},);
+
+    $.ajax(
+        {
+            type:'get',
+            dataType:'json',
+            async:false,
+            url:pageConfig.host + 'api/self/get_friend_lis',
+            headers:getHeader(),
+            data:
+                {
+
+                },
+            success:function()
+            {
+
+            },
+            error:function()
+            {
+
+    }
+    }
+    );
+
+
+
+
+
+    layui.use('mobile', function(){
+        var mobile = layui.mobile
+            ,layim = mobile.layim;
+
+        //TODO 获得好友列表, 传手机号匹配到系统中有的用户的和列表
+
+        var initData = {};
+
+        if( pageConfig.id == 1)
+        {
+            initData = {
+                //设置我的基础信息
+                mine: {
+                    "username": "向墨" //我的昵称
+                    ,"id": 1 //我的ID
+                    ,"avatar": "http://tp4.sinaimg.cn/1345566427/180/5730976522/0" //我的头像
+                }
+                //好友列表数据
+                ,friend: [
+                    {
+                        "groupname": "我的朋友" //好友分组名
+                        ,"id": 1 //分组ID
+                        ,"list": [{ //分组下的好友列表
+                            "username": "薛凌霄" //好友昵称
+                            ,"id": 2 //好友ID
+                            ,"avatar": "https://huajialife.com/images/header2.jpg" //好友头像
+                            ,"status": "online" //若值为offline代表离线，online或者不填为在线
+                        }]
+                    }
+                ],//见下文：init数据格式
+                "group": [{
+                    "groupname": "前端群"
+                    ,"id": "101"
+                    ,"avatar": "http://tp2.sinaimg.cn/2211874245/180/40050524279/0"
+                }]
+            };
+        } else if( pageConfig.id == 2 )
+        {
+            initData = {
+                //设置我的基础信息
+                mine: {
+                    "username": "薛凌霄" //我的昵称
+                    ,"id": 2 //我的ID
+                    ,"avatar": "https://huajialife.com/images/header2.jpg" //我的头像
+                }
+                //好友列表数据
+                ,friend: [
+                    {
+                        "groupname": "我的朋友" //好友分组名
+                        ,"id": 1 //分组ID
+                        ,"list": [{ //分组下的好友列表
+                            "username": "向墨" //好友昵称
+                            ,"id": 1 //好友ID
+                            ,"avatar": "http://tp4.sinaimg.cn/1345566427/180/5730976522/0" //好友头像
+                        }]
+                    }
+                ] //见下文：init数据格式
+                ,"group": [{
+                    "groupname": "前端群"
+                    ,"id": "101"
+                    ,"avatar": "http://tp2.sinaimg.cn/2211874245/180/40050524279/0"
+                }]
+            };
+        }
+
+
+
+        //基础配置
+        layim.config({
+            init: initData,
+            moreList:[],
+            isgroup: true //是否开启“群聊”
+        });
+
+
+        var socket = new WebSocket('ws://127.0.0.1:9501?id=' + pageConfig.id);
+
+        socket.onopen = function(){
+            console.log('socket 连接成功成功');
+        };
+
+        socket.onclose = function(){
+            console.log("socket 连接断开")
+        }
+
+        socket.onmessage = function(res){
+            console.log('接收到数据'+ res.data);
+            message = JSON.parse(res.data);
+            if(message.type === 'chatMessage'){
+                console.log(message.data);
+                layim.getMessage(message.data); //res.data即你发送消息传递的数据（阅读：监听发送的消息）
+            }
+        }
+
+        socket.onerror = function(res)
+        {
+            console.log('连接失败');
+        }
+
+
+        //layui的发送事件是在什么时候触发的
+        layim.on('sendMessage', function(res) {
+            var mine = res.mine; //包含我发送的消息及我的信息
+            var to = res.to;
+
+            console.log(mine);
+            console.log(to);
+
+            //送法消息
+            socket.send(JSON.stringify({
+                type: 'chatMessage' //随便定义，用于在服务端区分消息类型
+                ,data: res
+            }));
+
+        });
+
+    });
+
+
+//     layui.use('layim', function(layim){
+//
+//         //建立WebSocket通讯
+//         //注意：如果你要兼容ie8+，建议你采用 socket.io 的版本。下面是以原生WS为例
+//
+//         var socket = new WebSocket('ws://preach.zhuyan.me:8077/ws?sessionid=khbAm0OJWtaJXsCYUDOWm3tWS0Thgg8UfWhexKxv');
+//         //发送一个消息
+//         // socket.send('Hi Server, I am LayIM!');
+//
+//
+//         socket.onopen = function(){
+//             // socket.send('XXX连接成功');
+//             // alert('socket 连接成功成功');
+//             console.log('socket 连接成功成功');
+//         };
+//
+//         socket.onclose = function(){
+//             console.log("socket 连接断开")
+//             // clearInterval(ping)
+//         }
+//
+//
+//         socket.onmessage = function(res){
+//             console.log('接收到数据'+ res.data);
+//             // data = JSON.parse(res.data);
+//             // switch (data.type) {
+//             //     case "friend":
+//             //     case "group":
+//             //         console.log(data)
+//             //         layim.getMessage(data); //res.data即你发送消息传递的数据（阅读：监听发送的消息）
+//             //         break;
+//             //     //单纯的弹出
+//             //     case "layer":
+//             //         if (data.code == 200) {
+//             //             layer.msg(data.msg)
+//             //         } else {
+//             //             layer.msg(data.msg,function(){})
+//             //         }
+//             //         break;
+//             //     //将新好友添加到列表
+//             //     case "addList":
+//             //         console.log(data.data)
+//             //         layim.addList(data.data);
+//             //         break;
+//             //     //好友上下线变更
+//             //     case "friendStatus" :
+//             //         console.log(data.status)
+//             //         layim.setFriendStatus(data.uid, data.status);
+//             //         break;
+//             //     //消息盒子
+//             //     case "msgBox" :
+//             //         //为了等待页面加载，不然找不到消息盒子图标节点
+//             //         setTimeout(function(){
+//             //             if(data.count > 0){
+//             //                 layim.msgbox(data.count);
+//             //             }
+//             //         },1000);
+//             //         break;
+//             //     //token过期
+//             //     case "token_expire":
+//             //         window.location.reload();
+//             //         break;
+//             //     //加群提醒
+//             //     case "joinNotify":
+//             //         layim.getMessage(data.data);
+//             //         break;
+//             //
+//             // }
+//         };
+//
+//
+//
+//
+// //
+// //         //监听收到的消息
+// //         socket.onmessage = function(res){
+// //             //res为接受到的值，如 {"emit": "messageName", "data": {}}
+// //             //emit即为发出的事件名，用于区分不同的消息
+// //         };
+// //
+// //         另外还有onclose、onerror，分别是在链接关闭和出错时触发。
+//
+//         //基本上常用的就上面几个了，是不是非一般的简单？
+//
+//
+//     });
+</script>
+</body>
+</html>
