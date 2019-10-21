@@ -63,7 +63,7 @@
                 last_id:'',
                 list:[],
                 send_content:'',
-                host:'http://fs.cc'
+                host:'http://cw.zhuyan.me'
             },
             created:function () {
                 this.user_id = getQueryString('user_id'),
@@ -94,7 +94,7 @@
                         // 阻塞查询
                         $.ajax(
                             {
-                                'url':'http://fs.cc/api/chat_message',
+                                'url':this.host + '/api/chat_message',
                                 'type':'post',
                                 'data':{
                                     user_id:this.user_id,
