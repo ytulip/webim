@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>LayIM移动版测试</title>
+    <title></title>
     <link rel="stylesheet" href="../layer/css/layui.mobile.css" media="all">
     <link rel="stylesheet" href="../layer/css/modules/layim/mobile/layim.css?v=2.10" media="all">
 
@@ -17,7 +17,12 @@
 
 <div id="app" class="vue-dpn">
 <div id="layui-m-layer1" class="layui-m-layer layui-m-layer1" index="1">
-    <div class="layui-m-layermain"><div class="layui-m-layersection"><div class="layui-m-layerchild  layui-m-anim--1"><div class="layui-m-layercont"><div class="layim-panel layui-m-anim-left"><div class="layim-title" style="background-color: #36373C;"><p><i class="layui-icon layim-chat-back" layim-event="back"></i>薛凌霄<span class="layim-chat-status"></span></p></div><div class="layui-unselect layim-content"><div class="layim-chat layim-chat-friend"><div class="layim-chat-main"><ul>
+    <div class="layui-m-layermain">
+        <div class="layui-m-layersection"><div class="layui-m-layerchild  layui-m-anim--1"><div class="layui-m-layercont"><div class="layim-panel layui-m-anim-left">
+<!--            <div class="layim-title" style="background-color: #36373C;"><p><i class="layui-icon layim-chat-back" layim-event="back"></i>薛凌霄<span class="layim-chat-status"></span></p></div>-->
+            <div class="layui-unselect layim-content"><div class="layim-chat layim-chat-friend">
+                <div class="layim-chat-main">
+                    <ul>
 
     <li v-for="(item,index) in list" class="layim-chat-li" v-bind:class="{'layim-chat-mine':(item.user_id == current_user_id)}">
         <div class="layim-chat-user">
@@ -70,6 +75,9 @@
                 this.current_user_id = getQueryString('current_user_id'),
                 this.user_avatar = getQueryString('user_avatar'),
                 this.current_user_avatar = getQueryString('current_user_avatar')
+
+
+                document.title = getQueryString('nickname')
 
                 // console.log(this.user_id),
                 // console.log(this.current_user_id),
