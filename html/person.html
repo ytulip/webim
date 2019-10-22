@@ -70,7 +70,8 @@
                 last_id:'',
                 list:[],
                 send_content:'',
-                host:'http://cw.zhuyan.me'
+                host:'http://cw.zhuyan.me',
+                send_ids:[]
             },
             created:function () {
                 this.user_id = getQueryString('user_id'),
@@ -122,6 +123,10 @@
                                     {
                                         if( type ) {
                                             for (var i = data.data.data.length; i > 0; i--) {
+                                                if( data.data.data[i - 1].send_id && (this.send_ids.indexOf(data.data.data[i - 1].send_id) !== -1))
+                                                {
+                                                    continue;
+                                                }
                                                 _self.pushList(data.data.data[i - 1]);
                                             }
                                         }else
@@ -155,7 +160,10 @@
                         }
 
                         var content = this.send_content;
+                        var send_id = this.current_user_id + '_' +Date.now().toString();
                         this.send_content = '';
+                        this.send_ids.push(send_id);
+                        this.pushList({id:'','content':content,'user_id':this.current_user_id})
 
                         /*发送消息*/
                         $.ajax(
@@ -164,7 +172,8 @@
                                 data:{
                                     user_id:this.user_id,
                                     current_user_id:this.current_user_id,
-                                    content:content
+                                    content:content,
+                                    send_id:send_id
                                 },
                                 type:'post',
                                 dataType:'json',
