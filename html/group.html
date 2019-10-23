@@ -72,10 +72,12 @@
                 list:[],
                 send_content:'',
                 host:'http://cw.zhuyan.me',
-                send_ids:[]
+                send_ids:[],
+                group_id:'',
+                group:[]
             },
             created:function () {
-                this.user_id = getQueryString('user_id'),
+                this.group_id = getQueryString('group_id'),
                 this.current_user_id = getQueryString('current_user_id'),
                 this.user_avatar = getQueryString('user_avatar'),
                 this.current_user_avatar = getQueryString('current_user_avatar')
@@ -85,6 +87,7 @@
                 document.title = Base64.decode(getQueryString('group_name'))
 
 
+                // this.getGroupList();
                 // console.log(this.user_id),
                 // console.log(this.current_user_id),
                 // console.log(this.user_avatar),
@@ -95,8 +98,8 @@
                 $('.vue-dpn').removeClass('vue-dpn');
 
                 //添加当前时间
-
-                setTimeout(this.newMessage, 3000);
+                this.getGroupList();
+                // setTimeout(this.newMessage, 3000);
             },
             methods:
                 {
@@ -111,12 +114,10 @@
                                 'url':this.host + '/api/chat_message',
                                 'type':'post',
                                 'data':{
-                                    user_id:this.user_id,
-                                    current_user_id:this.current_user_id,
-                                    user_avatar:this.user_avatar,
-                                    current_user_avatar:this.current_user_avatar,
+                                    group_id:this.group_id,
                                     msg_id:this.last_id,
-                                    type:type
+                                    type:type,
+                                    msg_type:120
                                 },
                                 'async':false,
                                 'dataType':'json',
@@ -173,10 +174,11 @@
                             {
                                 url: this.host + '/api/send-chat',
                                 data:{
-                                    user_id:this.user_id,
+                                    group_id:this.group_id,
                                     current_user_id:this.current_user_id,
                                     content:content,
-                                    send_id:send_id
+                                    send_id:send_id,
+                                    msg_type:120
                                 },
                                 type:'post',
                                 dataType:'json',
@@ -196,9 +198,11 @@
                         $.ajax(
                             {
                                 url:'http://106.14.140.53:9090' + '/api/self/group/memberList',
+                                type:'post',
+                                async:false,
                                 data:{
                                     pageSize:10000,
-                                    groupId:'',
+                                    groupId:this.group_id,
                                     page:0,
                                 },
                                 beforeSend: function(xhr) {
@@ -206,7 +210,11 @@
                                 },
                                 dataType:'json',
                                 success:function(data){
-
+                                    if( data.code == 200 )
+                                    {
+                                        this.group = data.data;
+                                        setTimeout(_self.newMessage, 3000);
+                                    }
                                 }
                             }
                         );
