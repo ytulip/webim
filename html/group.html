@@ -28,8 +28,7 @@
 
                             <li v-for="(item,index) in list" class="layim-chat-li" v-bind:class="{'layim-chat-mine':(item.user_id == current_user_id)}">
                                 <div class="layim-chat-user">
-                                    <img :src="current_user_avatar" v-if="item.user_id == current_user_id">
-                                    <img :src="user_avatar" v-else>
+                                    <img :src="imgByUserId(item.user_id)">
                                 </div>
                                 <div class="layim-chat-text">{{item.content}}</div>
                             </li>
@@ -103,6 +102,12 @@
             },
             methods:
                 {
+                    getImageUrl(url) {
+                        if (url) {
+                            url = url.replace("loc://", 'http://106.14.140.53:3881/');
+                        }
+                        return url;
+                    },
                     newMessage()
                     {
                         // console.log(2)
@@ -127,7 +132,7 @@
                                     {
                                         if( type ) {
                                             for (var i = data.data.data.length; i > 0; i--) {
-                                                if( data.data.data[i - 1].send_id && (this.send_ids.indexOf(data.data.data[i - 1].send_id) !== -1))
+                                                if( data.data.data[i - 1].send_id && (_self.send_ids.indexOf(data.data.data[i - 1].send_id) !== -1))
                                                 {
                                                     continue;
                                                 }
@@ -209,15 +214,43 @@
                                     xhr.setRequestHeader("Authorization", _self.token);
                                 },
                                 dataType:'json',
+                                dataFilter: function(data) {
+                                    if (data) {
+                                        var stringedJSON = data.replace(
+                                            /:\s*(\d{16,})/g,
+                                            ': "uniqueprefix$1"'
+                                        );
+                                        if (typeof stringedJSON !== 'string') {
+                                            return stringedJSON;
+                                        }
+                                        var str = stringedJSON.replace(/uniqueprefix/g, '');
+                                        return str;
+                                    } else {
+                                        return {};
+                                    }
+                                },
                                 success:function(data){
                                     if( data.code == 200 )
                                     {
-                                        this.group = data.data;
+                                        _self.group = data.data;
+                                        /*循环处理*/
+                                        for( var i = 0, j = _self.group.length; i < j; i++ )
+                                        {
+                                            _self.group[i].head_img = _self.getImageUrl(_self.group[i].head_img)
+                                        }
+                                        console.log(_self.group)
                                         setTimeout(_self.newMessage, 3000);
                                     }
                                 }
                             }
                         );
+                    },
+                    imgByUserId(user_id){
+                        console.log(user_id)
+                        console.log(this.group)
+                        var target = _.where(this.group,{'id':user_id})[0];
+                        console.log(target)
+                        return target['head_img'];
                     }
 
                 }
