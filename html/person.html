@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="../layer/css/layui.mobile.css" media="all">
     <link rel="stylesheet" href="../layer/css/modules/layim/mobile/layim.css?v=2.10" media="all">
 
+
 </head>
 <style>
     .vue-dpn
@@ -26,12 +27,15 @@
                 <div class="layim-chat-main" ref="chatMain">
                     <ul>
 
-    <li v-for="(item,index) in list" class="layim-chat-li" v-bind:class="{'layim-chat-mine':(item.user_id == current_user_id)}">
-        <div class="layim-chat-user">
+                        <!--<li class="layim-chat-system" v-if="item.system"><span>08-06 00:51</span></li>-->
+
+    <li v-for="(item,index) in list" v-bind:class="{'layim-chat-mine':(item.user_id == current_user_id),'layim-chat-system':item.system,'layim-chat-li':!item.system}">
+        <div class="layim-chat-user" v-if="!item.system">
             <img :src="current_user_avatar" v-if="item.user_id == current_user_id">
             <img :src="user_avatar" v-else>
         </div>
-        <div class="layim-chat-text">{{item.content}}</div>
+        <div class="layim-chat-text" v-if="!item.system">{{item.content}}</div>
+        <span v-if="item.system">{{item.time}}</span>
     </li>
 
 
@@ -53,7 +57,11 @@
 <script src="../js/jquery.min.js"></script>
 <script src="../js/base64.min.js"></script>
 <script src="https://underscorejs.net/underscore.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.20.1/moment.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.20.1/locale/zh-cn.js"></script>
 <script>
+
+    moment.locale("zh-cn");
 
     function getQueryString(name) {
         var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
@@ -73,7 +81,8 @@
                 list:[],
                 send_content:'',
                 host:'http://cw.zhuyan.me',
-                send_ids:[]
+                send_ids:[],
+                days:[]
             },
             created:function () {
                 this.user_id = getQueryString('user_id'),
@@ -152,8 +161,24 @@
                                                     'success':function(data)
                                                     {
                                                         for (var i = data.data.data.length; i > 0; i--) {
+
+                                                            /*如果这个日子不存在的话,那么增加一个日子*/
+                                                            var timeStr = data.data.data[i-1].created_at.substr(5,5);
+                                                            // console.log(timeStr)
+                                                            if( _self.days.indexOf(timeStr) === -1)
+                                                            {
+                                                                _self.days.push(timeStr);
+                                                                _self.pushList({'system':true,'time':timeStr});
+                                                            }
+
                                                             _self.pushList(data.data.data[i - 1]);
                                                         }
+
+
+                                                        //这里添加当前时间
+                                                        _self.pushList({'system':true,'time':moment().format('MM-DD HH:mm')})
+
+
 
                                                         //把scroll定位到最后
                                                         _self.$nextTick(function(){
