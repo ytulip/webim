@@ -33,6 +33,8 @@
         <div class="layim-chat-user" v-if="!item.system">
             <img :src="current_user_avatar" v-if="item.user_id == current_user_id">
             <img :src="user_avatar" v-else>
+            <cite v-if="item.user_id == current_user_id">{{item.nickname}}</cite>
+            <cite v-else>{{item.current_nickname}}</cite>
         </div>
         <div class="layim-chat-text" v-if="!item.system" v-html="parseContent(item.content)"></div>
         <span v-if="item.system">{{item.time}}</span>
@@ -90,6 +92,8 @@
                 send_ids:[],
                 days:[],
                 face_layer:false,
+                current_nickname:'',
+                nickname:'',
                 face_config:[
                     {'src':'../layer/images/face/0.gif','title':'[微笑]'},
                     {'src':'../layer/images/face/1.gif','title':'[嘻嘻]'},
@@ -173,6 +177,8 @@
 
 
                 document.title = Base64.decode(getQueryString('nickname'))
+                this.nickname = Base64.decode(getQueryString('nickname'))
+                this.current_nickname = Base64.decode(getQueryString('current_nickname'))
 
                 // console.log(this.user_id),
                 // console.log(this.current_user_id),
