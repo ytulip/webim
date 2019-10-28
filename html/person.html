@@ -18,7 +18,12 @@
 </style>
 <body>
 
+<div style="position: fixed;top:0;left: 0;right: 0;bottom: 0;background-color: #ffffff;z-index: 999;">
+    <img src="../image/loading.gif" style="position: absolute;top:50%;left:50%;transform: translate(-50%,-50%);-webkit-transform: translate(-50%,-50%);"/>
+</div>
+
 <div id="app" class="vue-dpn">
+
 <div id="layui-m-layer1" class="layui-m-layer layui-m-layer1" index="1">
     <div class="layui-m-layermain">
         <div class="layui-m-layersection"><div class="layui-m-layerchild  layui-m-anim--1"><div class="layui-m-layercont"><div class="layim-panel layui-m-anim-left">
@@ -50,11 +55,15 @@
         </div></div></div></div></div></div></div></div>
 </div>
 
-    <div id="layui-m-layer6" class="layui-m-layer layui-m-layer1" index="6" v-if="face_layer"><div class="layui-m-layermain"><div class="layui-m-layersection"><div class="layui-m-layerchild layim-layer layui-m-anim-scale"><div class="layui-m-layercont"><ul class="layui-layim-face">
+<div id="layui-m-layer6" class="layui-m-layer layui-m-layer1" index="6" v-if="face_layer"><div class="layui-m-layermain"><div class="layui-m-layersection"><div class="layui-m-layerchild layim-layer layui-m-anim-scale"><div class="layui-m-layercont"><ul class="layui-layim-face">
 
         <li v-for="(item,index) in face_config" :title="item.title" @click="addFace(item)"><img :src="item.src"/></li>
 
         </ul></div></div></div></div></div>
+
+<div  class="layui-m-layer layui-m-layer1" index="7" style="position: fixed;top:0;left: 0;right: 0;bottom: 0;background-color: #ffffff;" v-if="loading_layer">
+    <img src="../image/loading_more.gif" style="position: absolute;top:50%;left:50%;transform: translate(-50%,-50%);-webkit-transform: translate(-50%,-50%);"/>
+</div>
 
 </div>
 <script src="../layer/layui.js"></script>
@@ -69,6 +78,7 @@
     moment.locale("zh-cn");
 
     /*加载动画*/
+
     
 
     function getQueryString(name) {
@@ -94,6 +104,7 @@
                 face_layer:false,
                 current_nickname:'',
                 nickname:'',
+                loading_layer:true,
                 face_config:[
                     {'src':'../layer/images/face/0.gif','title':'[微笑]'},
                     {'src':'../layer/images/face/1.gif','title':'[嘻嘻]'},
@@ -301,6 +312,8 @@
                                                         _self.$nextTick(function(){
                                                             _self.$refs.chatMain.scrollTop = _self.$refs.chatMain.scrollHeight
                                                         })
+
+                                                        _self.loading_layer = false;
                                                     }
                                                 }
                                             );
