@@ -17,11 +17,6 @@
     }
 </style>
 <body>
-
-<div style="position: fixed;top:0;left: 0;right: 0;bottom: 0;background-color: #ffffff;z-index: 999;">
-    <img src="../image/loading.gif" style="position: absolute;top:50%;left:50%;transform: translate(-50%,-50%);-webkit-transform: translate(-50%,-50%);"/>
-</div>
-
 <div id="app" class="vue-dpn">
 
 <div id="layui-m-layer1" class="layui-m-layer layui-m-layer1" index="1">
@@ -66,13 +61,13 @@
 </div>
 
 </div>
-<script src="../layer/layui.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<!--<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
 <script src="../js/jquery.min.js"></script>
 <script src="../js/base64.min.js"></script>
-<script src="https://underscorejs.net/underscore.js"></script>
-<script src="https://cdn.bootcss.com/moment.js/2.20.1/moment.min.js"></script>
-<script src="https://cdn.bootcss.com/moment.js/2.20.1/locale/zh-cn.js"></script>
+<script src="../js/underscore.js"></script>
+<script src="../js/moment.min.js"></script>
+<script src="../js/zh-cn.js"></script>
 <script>
 
     moment.locale("zh-cn");
@@ -202,10 +197,62 @@
 
                 //添加当前时间
 
+                this.pushList({'system':true,'time':moment().format('MM-DD HH:mm')})
+                this.loading_layer = false
+
                 setTimeout(this.newMessage, 3000);
             },
             methods:
                 {
+                    getHistoryMessage()
+                    {
+                        var _self = this;
+                        var historyArr = [];
+                        //这里去加载历史聊天记录
+                        $.ajax(
+                            {
+                                'url': _self.host + '/api/chat_message',
+                                'type': 'post',
+                                'data': {
+                                    user_id: _self.user_id,
+                                    current_user_id:_self.current_user_id,
+                                    msg_id: _self.last_id,
+                                    type: 2,
+                                    limit:1000
+                                },
+                                'dataType': 'json',
+                                'success':function(data)
+                                {
+                                    for (var i = data.data.data.length; i > 0; i--) {
+
+                                        /*如果这个日子不存在的话,那么增加一个日子*/
+                                        var timeStr = data.data.data[i-1].created_at.substr(5,5);
+                                        // console.log(timeStr)
+                                        if( _self.days.indexOf(timeStr) === -1)
+                                        {
+                                            _self.days.push(timeStr);
+                                            historyArr.push({'system':true,'time':timeStr});
+                                            // _self.unshift({'system':true,'time':timeStr});
+                                        }
+
+                                        historyArr.push(data.data.data[i - 1]);
+                                        // _self.unshift(data.data.data[i - 1]);
+
+
+                                    }
+
+                                    //合并数组
+
+                                    console.log(historyArr)
+                                    _self.list = historyArr.concat(_self.list)
+
+                                    _self.$nextTick(function(){
+                                        _self.$refs.chatMain.scrollTop = _self.$refs.chatMain.scrollHeight
+                                    })
+                                }
+                            }
+                        );
+                    },
                     /*转化表情内容*/
                     parseContent(content)
                     {
@@ -254,7 +301,6 @@
                                     msg_id:this.last_id,
                                     type:type
                                 },
-                                'async':false,
                                 'dataType':'json',
                                 success:function(data)
                                 {
@@ -271,52 +317,53 @@
                                         }else
                                         {
                                             _self.last_id = data.data;
-
+                                            _self.getHistoryMessage();
+                                            //这里添加当前时间
                                             //这里去加载历史聊天记录
-                                            $.ajax(
-                                                {
-                                                    'url': _self.host + '/api/chat_message',
-                                                    'type': 'post',
-                                                    'data': {
-                                                        user_id: _self.user_id,
-                                                        current_user_id:_self.current_user_id,
-                                                        msg_id: _self.last_id,
-                                                        type: 2,
-                                                        limit:1000
-                                                    },
-                                                    'async': false,
-                                                    'dataType': 'json',
-                                                    'success':function(data)
-                                                    {
-                                                        for (var i = data.data.data.length; i > 0; i--) {
-
-                                                            /*如果这个日子不存在的话,那么增加一个日子*/
-                                                            var timeStr = data.data.data[i-1].created_at.substr(5,5);
-                                                            // console.log(timeStr)
-                                                            if( _self.days.indexOf(timeStr) === -1)
-                                                            {
-                                                                _self.days.push(timeStr);
-                                                                _self.pushList({'system':true,'time':timeStr});
-                                                            }
-
-                                                            _self.pushList(data.data.data[i - 1]);
-                                                        }
-
-
-                                                        //这里添加当前时间
-                                                        _self.pushList({'system':true,'time':moment().format('MM-DD HH:mm')})
-
-
-
-                                                        //把scroll定位到最后
-                                                        _self.$nextTick(function(){
-                                                            _self.$refs.chatMain.scrollTop = _self.$refs.chatMain.scrollHeight
-                                                        })
-
-                                                        _self.loading_layer = false;
-                                                    }
-                                                }
-                                            );
+                                            // $.ajax(
+                                            //     {
+                                            //         'url': _self.host + '/api/chat_message',
+                                            //         'type': 'post',
+                                            //         'data': {
+                                            //             user_id: _self.user_id,
+                                            //             current_user_id:_self.current_user_id,
+                                            //             msg_id: _self.last_id,
+                                            //             type: 2,
+                                            //             limit:1000
+                                            //         },
+                                            //         'async': false,
+                                            //         'dataType': 'json',
+                                            //         'success':function(data)
+                                            //         {
+                                            //             for (var i = data.data.data.length; i > 0; i--) {
+                                            //
+                                            //                 /*如果这个日子不存在的话,那么增加一个日子*/
+                                            //                 var timeStr = data.data.data[i-1].created_at.substr(5,5);
+                                            //                 // console.log(timeStr)
+                                            //                 if( _self.days.indexOf(timeStr) === -1)
+                                            //                 {
+                                            //                     _self.days.push(timeStr);
+                                            //                     _self.pushList({'system':true,'time':timeStr});
+                                            //                 }
+                                            //
+                                            //                 _self.pushList(data.data.data[i - 1]);
+                                            //             }
+                                            //
+                                            //
+                                            //             //这里添加当前时间
+                                            //             _self.pushList({'system':true,'time':moment().format('MM-DD HH:mm')})
+                                            //
+                                            //
+                                            //
+                                            //             //把scroll定位到最后
+                                            //             _self.$nextTick(function(){
+                                            //                 _self.$refs.chatMain.scrollTop = _self.$refs.chatMain.scrollHeight
+                                            //             })
+                                            //
+                                            //             _self.loading_layer = false;
+                                            //         }
+                                            //     }
+                                            // );
 
                                             // for (var i = 0,j = data.data.data.length; i < j; i++) {
                                             //     _self.pushList(data.data.data[i]);
