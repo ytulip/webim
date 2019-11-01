@@ -227,7 +227,8 @@
                                     msg_id: this.last_id,
                                     type: 2,
                                     limit:1000,
-                                    msg_type:120
+                                    msg_type:120,
+                                    current_user_id:this.current_user_id
                                 },
                                 'async': false,
                                 'dataType': 'json',
@@ -281,7 +282,8 @@
                                     group_id:this.group_id,
                                     msg_id:this.last_id,
                                     type:type,
-                                    msg_type:120
+                                    msg_type:120,
+                                    current_user_id:this.current_user_id
                                 },
                                 'async':false,
                                 'dataType':'json',
