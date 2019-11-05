@@ -15,6 +15,10 @@
     {
         display: none;
     }
+
+    .layim-chat-text img{
+        max-width: 140px;
+    }
 </style>
 <body>
 <div id="app" class="vue-dpn">
@@ -45,7 +49,11 @@
                 </div>
 
         <div class="layim-chat-footer"><div class="layim-chat-send"><input type="text" autocomplete="off" v-model="send_content"><button class="layim-send" v-bind:class="{'layui-disabled':!send_content}" @click="sendMsg">发送</button></div>
-            <div class="layim-chat-tool" data-json="%7B%22username%22%3A%22%E8%96%9B%E5%87%8C%E9%9C%84%22%2C%22avatar%22%3A%22https%3A%2F%2Fhuajialife.com%2Fimages%2Fheader2.jpg%22%2C%22id%22%3A2%2C%22type%22%3A%22friend%22%2C%22content%22%3A%221%E7%82%B9%E5%87%86%E5%A4%87%E7%9D%A1%E4%BA%86%22%2C%22mine%22%3Afalse%2C%22timestamp%22%3A1565023914%2C%22name%22%3A%22%E8%96%9B%E5%87%8C%E9%9C%84%22%2C%22historyTime%22%3A1565023914087%2C%22sign%22%3A%221%E7%82%B9%E5%87%86%E5%A4%87%E7%9D%A1%E4%BA%86%22%7D"><span class="layui-icon layim-tool-face" title="选择表情" v-on:click="chosenFace"></span>
+            <div class="layim-chat-tool" data-json="%7B%22username%22%3A%22%E8%96%9B%E5%87%8C%E9%9C%84%22%2C%22avatar%22%3A%22https%3A%2F%2Fhuajialife.com%2Fimages%2Fheader2.jpg%22%2C%22id%22%3A2%2C%22type%22%3A%22friend%22%2C%22content%22%3A%221%E7%82%B9%E5%87%86%E5%A4%87%E7%9D%A1%E4%BA%86%22%2C%22mine%22%3Afalse%2C%22timestamp%22%3A1565023914%2C%22name%22%3A%22%E8%96%9B%E5%87%8C%E9%9C%84%22%2C%22historyTime%22%3A1565023914087%2C%22sign%22%3A%221%E7%82%B9%E5%87%86%E5%A4%87%E7%9D%A1%E4%BA%86%22%7D">
+                <span class="layui-icon layim-tool-face" title="选择表情" v-on:click="chosenFace"></span>
+                <img style="display: inline-block;height: 26px;vertical-align: middle;" src="../image/picture.png" @click="uploadImg"/>
+
+                <!--<span class="layui-icon layim-tool-image" title="上传图片" @click="uploadImg"></span>-->
             </div>
         </div></div></div></div></div></div></div></div>
 </div>
@@ -59,6 +67,10 @@
 <div  class="layui-m-layer layui-m-layer1" index="7" style="position: fixed;top:0;left: 0;right: 0;bottom: 0;background-color: #ffffff;" v-if="loading_layer">
     <img src="../image/loading_more.gif" style="position: absolute;top:50%;left:50%;transform: translate(-50%,-50%);-webkit-transform: translate(-50%,-50%);"/>
 </div>
+
+<form style="display: none;" id="data-form">
+    <input id="fileTarget" ref="filElem" type="file" name="file"  style="display: none" accept="image/gif,image/jpeg,image/png"  @change="getFile"/>
+</form>
 
 </div>
 <!--<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
@@ -256,6 +268,13 @@
                     /*转化表情内容*/
                     parseContent(content)
                     {
+                        //如果是图片那么特殊处理
+                        if( content.indexOf('<img') == 0 )
+                        {
+                            return content.replace('src="','src="' + this.host);
+                        }
+
+
                         var _self = this;
                         return content.replace(/face\[[\u4e00-\u9fa5]+\]/g, function (match) {
                             match = match.replace('face','')
@@ -420,6 +439,86 @@
                                 }
                             }
                         )
+                    },
+                    uploadImg(){
+                        this.$refs.filElem.dispatchEvent(new MouseEvent('click'))
+                    },
+                    getFile()
+                    {
+                        var _self = this;
+                        const inputFile = this.$refs.filElem.files[0];
+                        if(inputFile){
+                            if(inputFile.type !== 'image/jpeg' && inputFile.type !== 'image/png' && inputFile.type !== 'image/gif'){
+                                alert('不是有效的图片文件！');
+                                return;
+                            }
+
+                            var formElement = document.querySelector("#data-form");
+                            var formData = new FormData(formElement);
+
+                            $.ajax({
+                                url:this.host + '/api/api-cloud-img',
+                                data:formData,
+                                type:'post',
+                                contentType: false,
+                                processData: false,
+                                dataType:'json',
+                                success:function(data){
+                                    // if(data.status){
+                                    //     $('#img-show').attr('src',data.data.img_url);
+                                    // }
+
+
+                                    if( data.status )
+                                    {
+                                        var content = '<img src="'+data.data+'"/>';
+                                    }
+
+                                    console.log(content);
+                                    var send_id = _self.current_user_id + '_' +Date.now().toString();
+                                    _self.send_ids.push(send_id);
+                                    _self.pushList({id:'','content':content,'user_id':_self.current_user_id})
+
+                                    /*发送消息*/
+                                    $.ajax(
+                                        {
+                                            url: this.host + '/api/send-chat',
+                                            data:{
+                                                user_id:this.user_id,
+                                                current_user_id:this.current_user_id,
+                                                content:content,
+                                                send_id:send_id
+                                            },
+                                            type:'post',
+                                            dataType:'json',
+                                            success:function(data)
+                                            {
+                                                if( data.status )
+                                                {
+
+                                                }
+                                            }
+                                        }
+                                    )
+
+                                },
+                                error:function(data)
+                                {
+                                    alert('网络异常');
+                                }
+                            });
+
+                            // uploadLogo(formData).then((res)=>{
+                            //     this.$refs.filElem.value = '';
+                            //     if( res.status == 1 )
+                            //     {
+                            //         this.logo_path = res.data;
+                            //         // this.logo = res.logo_url;
+                            //     }
+                            // })
+                        } else {
+                            return;
+                        }
                     },
 
                 },
