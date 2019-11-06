@@ -108,7 +108,14 @@
     moment.locale("zh-cn");
 
     /*加载动画*/
+    function cAlert(msg)
+    {
+        try{
+            Toast.postMessage(msg)
+        }catch (e) {
 
+        }
+    }
     
 
     function getQueryString(name) {
@@ -466,6 +473,7 @@
                         )
                     },
                     uploadImg(){
+                        cAlert('发送图片');
                         this.$refs.filElem.dispatchEvent(new MouseEvent('click'))
                     },
                     getFile()
