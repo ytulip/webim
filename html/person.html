@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="../layer/css/layui.mobile.css" media="all">
     <link rel="stylesheet" href="../layer/css/modules/layim/mobile/layim.css?v=2.10" media="all">
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vant@2.0/lib/index.css">
+
 
 </head>
 <style>
@@ -18,6 +20,16 @@
 
     .layim-chat-text img{
         max-width: 140px;
+    }
+
+    .van-image-preview__overlay
+    {
+        z-index:  999999999 !important;
+    }
+
+    .van-image-preview
+    {
+        z-index: 999999999 !important;
     }
 </style>
 <body>
@@ -40,7 +52,7 @@
             <cite v-if="item.user_id == current_user_id">{{nickname}}</cite>
             <cite v-else>{{current_nickname}}</cite>
         </div>
-        <div class="layim-chat-text" v-if="!item.system" v-html="parseContent(item.content)"></div>
+        <div class="layim-chat-text" v-if="!item.system" v-html="parseContent(item.content)" @click="showImg(item)"></div>
         <span v-if="item.system">{{item.time}}</span>
     </li>
 
@@ -72,15 +84,26 @@
     <input id="fileTarget" ref="filElem" type="file" name="file"  style="display: none" accept="image/gif,image/jpeg,image/png"  @change="getFile"/>
 </form>
 
+    <van-image-preview
+            v-model="show"
+            :images="images"
+    >
+    </van-image-preview>
+
 </div>
 <!--<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
 <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+<script src="https://cdn.jsdelivr.net/npm/vant@2.0/lib/vant.min.js"></script>
 <script src="../js/jquery.min.js"></script>
 <script src="../js/base64.min.js"></script>
 <script src="../js/underscore.js"></script>
 <script src="../js/moment.min.js"></script>
 <script src="../js/zh-cn.js"></script>
 <script>
+
+    var vant = window.vant;
+    // 注册组件
+    Vue.use(vant);
 
     moment.locale("zh-cn");
 
@@ -185,7 +208,9 @@
                     {'src':'../layer/images/face/69.gif','title':'[话筒]'},
                     {'src':'../layer/images/face/70.gif','title':'[蜡烛]'},
                     {'src':'../layer/images/face/71.gif','title':'[蛋糕]'},
-                ]
+                ],
+                images:[],
+                show:false
             },
             created:function () {
                 this.user_id = getQueryString('user_id'),
@@ -482,10 +507,10 @@
                                     /*发送消息*/
                                     $.ajax(
                                         {
-                                            url: this.host + '/api/send-chat',
+                                            url: _self.host + '/api/send-chat',
                                             data:{
-                                                user_id:this.user_id,
-                                                current_user_id:this.current_user_id,
+                                                user_id:_self.user_id,
+                                                current_user_id:_self.current_user_id,
                                                 content:content,
                                                 send_id:send_id
                                             },
@@ -520,6 +545,23 @@
                             return;
                         }
                     },
+                    showImg(item)
+                    {
+                        if( item.content.indexOf('<img') !== 0 )
+                        {
+                            return;
+                        }
+                        //TODO 去截取图片路径部分
+
+                        var srcReg = /src=[\'\"]?([^\'\"]*)[\'\"]?/i;
+                        var arr = item.content.match(srcReg);
+
+                        if( arr[1] )
+                        {
+                            this.show = true;
+                            this.images = [this.host + arr[1]];
+                        }
+                    }
 
                 },
             computed:{
