@@ -64,7 +64,7 @@
             <div class="layim-chat-tool" data-json="%7B%22username%22%3A%22%E8%96%9B%E5%87%8C%E9%9C%84%22%2C%22avatar%22%3A%22https%3A%2F%2Fhuajialife.com%2Fimages%2Fheader2.jpg%22%2C%22id%22%3A2%2C%22type%22%3A%22friend%22%2C%22content%22%3A%221%E7%82%B9%E5%87%86%E5%A4%87%E7%9D%A1%E4%BA%86%22%2C%22mine%22%3Afalse%2C%22timestamp%22%3A1565023914%2C%22name%22%3A%22%E8%96%9B%E5%87%8C%E9%9C%84%22%2C%22historyTime%22%3A1565023914087%2C%22sign%22%3A%221%E7%82%B9%E5%87%86%E5%A4%87%E7%9D%A1%E4%BA%86%22%7D">
                 <span class="layui-icon layim-tool-face" title="选择表情" v-on:click="chosenFace"></span>
                 <img style="display: inline-block;height: 26px;vertical-align: middle;" src="../image/picture.png" @click="uploadImg"/>
-
+                <input type="file" value="上传图片" style="font-size: 16px;"/>
                 <!--<span class="layui-icon layim-tool-image" title="上传图片" @click="uploadImg"></span>-->
             </div>
         </div></div></div></div></div></div></div></div>
@@ -108,7 +108,14 @@
     moment.locale("zh-cn");
 
     /*加载动画*/
+    function cAlert(msg)
+    {
+        try{
+            Toast.postMessage(msg)
+        }catch (e) {
 
+        }
+    }
     
 
     function getQueryString(name) {
@@ -466,6 +473,7 @@
                         )
                     },
                     uploadImg(){
+                        cAlert('发送图片');
                         this.$refs.filElem.dispatchEvent(new MouseEvent('click'))
                     },
                     getFile()
