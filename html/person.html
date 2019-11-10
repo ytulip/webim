@@ -49,8 +49,8 @@
         <div class="layim-chat-user" v-if="!item.system">
             <img :src="current_user_avatar" v-if="item.user_id == current_user_id">
             <img :src="user_avatar" v-else>
-            <cite v-if="item.user_id == current_user_id">{{current_nickname}}</cite>
-            <cite v-else>{{nickname}}</cite>
+            <cite v-if="item.user_id == current_user_id">{{nickname}}</cite>
+            <cite v-else>{{current_nickname}}</cite>
         </div>
         <div class="layim-chat-text" v-if="!item.system" v-html="parseContent(item.content)" @click="showImg(item)"></div>
         <span v-if="item.system">{{item.time}}</span>

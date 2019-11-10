@@ -8,11 +8,27 @@
     <link rel="stylesheet" href="../layer/css/layui.mobile.css" media="all">
     <link rel="stylesheet" href="../layer/css/modules/layim/mobile/layim.css?v=2.10" media="all">
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vant@2.0/lib/index.css">
+
 </head>
 <style>
     .vue-dpn
     {
         display: none;
+    }
+
+    .layim-chat-text img{
+        max-width: 140px;
+    }
+
+    .van-image-preview__overlay
+    {
+        z-index:  999999999 !important;
+    }
+
+    .van-image-preview
+    {
+        z-index: 999999999 !important;
     }
 </style>
 <body>
@@ -30,7 +46,7 @@
                                 <div class="layim-chat-user" v-if="!item.system">
                                     <img :src="imgByUserId(item.user_id)">
                                 </div>
-                                <div class="layim-chat-text" v-if="!item.system" v-html="parseContent(item.content)"></div>
+                                <div class="layim-chat-text" v-if="!item.system" v-html="parseContent(item.content)" @click="showImg(item)"></div>
                                 <span v-if="item.system">{{item.time}}</span>
                             </li>
 
@@ -38,7 +54,7 @@
                         </ul></div>
 
                     <div class="layim-chat-footer"><div class="layim-chat-send"><input type="text" autocomplete="off" v-model="send_content"><button class="layim-send" v-bind:class="{'layui-disabled':!send_content}" @click="sendMsg">发送</button></div>
-                        <div class="layim-chat-tool" data-json="%7B%22username%22%3A%22%E8%96%9B%E5%87%8C%E9%9C%84%22%2C%22avatar%22%3A%22https%3A%2F%2Fhuajialife.com%2Fimages%2Fheader2.jpg%22%2C%22id%22%3A2%2C%22type%22%3A%22friend%22%2C%22content%22%3A%221%E7%82%B9%E5%87%86%E5%A4%87%E7%9D%A1%E4%BA%86%22%2C%22mine%22%3Afalse%2C%22timestamp%22%3A1565023914%2C%22name%22%3A%22%E8%96%9B%E5%87%8C%E9%9C%84%22%2C%22historyTime%22%3A1565023914087%2C%22sign%22%3A%221%E7%82%B9%E5%87%86%E5%A4%87%E7%9D%A1%E4%BA%86%22%7D"><span class="layui-icon layim-tool-face" title="选择表情" v-on:click="chosenFace"></span>
+                        <div class="layim-chat-tool" data-json="%7B%22username%22%3A%22%E8%96%9B%E5%87%8C%E9%9C%84%22%2C%22avatar%22%3A%22https%3A%2F%2Fhuajialife.com%2Fimages%2Fheader2.jpg%22%2C%22id%22%3A2%2C%22type%22%3A%22friend%22%2C%22content%22%3A%221%E7%82%B9%E5%87%86%E5%A4%87%E7%9D%A1%E4%BA%86%22%2C%22mine%22%3Afalse%2C%22timestamp%22%3A1565023914%2C%22name%22%3A%22%E8%96%9B%E5%87%8C%E9%9C%84%22%2C%22historyTime%22%3A1565023914087%2C%22sign%22%3A%221%E7%82%B9%E5%87%86%E5%A4%87%E7%9D%A1%E4%BA%86%22%7D"><span class="layui-icon layim-tool-face" title="选择表情" v-on:click="chosenFace"></span><img style="display: inline-block;height: 26px;vertical-align: middle;" src="../image/picture.png" @click="uploadImg"/>
                         </div>
                     </div></div></div></div></div></div></div></div>
     </div>
@@ -47,10 +63,21 @@
         <li v-for="(item,index) in face_config" :title="item.title" @click="addFace(item)"><img :src="item.src"/></li>
     </ul></div></div></div></div></div>
 
+    <form style="display: none;" id="data-form">
+        <input id="fileTarget" ref="filElem" type="file" name="file"  style="display: none" accept="image/gif,image/jpeg,image/png"  @change="getFile"/>
+    </form>
+
+    <van-image-preview
+            v-model="show"
+            :images="images"
+    >
+    </van-image-preview>
+
 </div>
 
 <script src="../layer/layui.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vant@2.0/lib/vant.min.js"></script>
 <script src="../js/jquery.min.js"></script>
 <script src="../js/base64.min.js"></script>
 <script src="https://underscorejs.net/underscore.js"></script>
@@ -156,7 +183,9 @@
                     {'src':'../layer/images/face/69.gif','title':'[话筒]'},
                     {'src':'../layer/images/face/70.gif','title':'[蜡烛]'},
                     {'src':'../layer/images/face/71.gif','title':'[蛋糕]'},
-                ]
+                ],
+                images:[],
+                show:false
             },
             created:function () {
                 this.group_id = getQueryString('group_id'),
@@ -187,6 +216,13 @@
                 {
                     parseContent(content)
                     {
+                        //如果是图片那么特殊处理
+                        if( content.indexOf('<img') == 0 )
+                        {
+                            return content.replace('src="','src="' + this.host);
+                        }
+
+
                         var _self = this;
                         return content.replace(/face\[[\u4e00-\u9fa5]+\]/g, function (match) {
                             match = match.replace('face','')
@@ -413,8 +449,105 @@
                         var target = _.where(this.group,{'id':user_id})[0];
                         console.log(target)
                         return target['head_img'];
-                    }
+                    },
+                    uploadImg(){
+                        this.$refs.filElem.dispatchEvent(new MouseEvent('click'))
+                    },
+                    getFile()
+                    {
+                        var _self = this;
+                        const inputFile = this.$refs.filElem.files[0];
+                        if(inputFile){
+                            if(inputFile.type !== 'image/jpeg' && inputFile.type !== 'image/png' && inputFile.type !== 'image/gif'){
+                                alert('不是有效的图片文件！');
+                                return;
+                            }
 
+                            var formElement = document.querySelector("#data-form");
+                            var formData = new FormData(formElement);
+
+                            $.ajax({
+                                url:this.host + '/api/api-cloud-img',
+                                data:formData,
+                                type:'post',
+                                contentType: false,
+                                processData: false,
+                                dataType:'json',
+                                success:function(data){
+                                    // if(data.status){
+                                    //     $('#img-show').attr('src',data.data.img_url);
+                                    // }
+
+
+                                    if( data.status )
+                                    {
+                                        var content = '<img src="'+data.data+'"/>';
+                                    }
+
+                                    console.log(content);
+                                    var send_id = _self.current_user_id + '_' +Date.now().toString();
+                                    _self.send_ids.push(send_id);
+                                    _self.pushList({id:'','content':content,'user_id':_self.current_user_id})
+
+                                    /*发送消息*/
+                                    $.ajax(
+                                        {
+                                            url: _self.host + '/api/send-chat',
+                                            data:{
+                                                group_id:_self.group_id,
+                                                current_user_id:_self.current_user_id,
+                                                content:content,
+                                                send_id:send_id,
+                                                msg_type:120
+                                            },
+                                            type:'post',
+                                            dataType:'json',
+                                            success:function(data)
+                                            {
+                                                if( data.status )
+                                                {
+
+                                                }
+                                            }
+                                        }
+                                    )
+
+                                },
+                                error:function(data)
+                                {
+                                    alert('网络异常');
+                                }
+                            });
+
+                            // uploadLogo(formData).then((res)=>{
+                            //     this.$refs.filElem.value = '';
+                            //     if( res.status == 1 )
+                            //     {
+                            //         this.logo_path = res.data;
+                            //         // this.logo = res.logo_url;
+                            //     }
+                            // })
+                        } else {
+                            return;
+                        }
+                    },
+                    showImg(item)
+                    {
+                        if( item.content.indexOf('<img') !== 0 )
+                        {
+                            return;
+                        }
+                        //TODO 去截取图片路径部分
+
+                        var srcReg = /src=[\'\"]?([^\'\"]*)[\'\"]?/i;
+                        var arr = item.content.match(srcReg);
+
+                        if( arr[1] )
+                        {
+                            this.show = true;
+                            this.images = [this.host + arr[1]];
+                        }
+                    }
                 },
             computed:{
                 faceArr:function()
