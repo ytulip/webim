@@ -448,10 +448,10 @@
                         var target = _.where(this.group,{'id':user_id})[0];
                         return target['head_img'];
                     },
-                    nicknameByUserId()
+                    nicknameByUserId(user_id)
                     {
                         var target = _.where(this.group,{'id':user_id})[0];
-                        return target['user_name'];
+                        return target['real_name'];
                     },
                     uploadImg(){
                         this.$refs.filElem.dispatchEvent(new MouseEvent('click'))
