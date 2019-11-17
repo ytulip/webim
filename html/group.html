@@ -45,6 +45,7 @@
                             <li v-for="(item,index) in list" v-bind:class="{'layim-chat-mine':(item.user_id == current_user_id),'layim-chat-system':item.system,'layim-chat-li':!item.system}">
                                 <div class="layim-chat-user" v-if="!item.system">
                                     <img :src="imgByUserId(item.user_id)">
+                                    <cite>{{nicknameByUserId(item.user_id)}}</cite>
                                 </div>
                                 <div class="layim-chat-text" v-if="!item.system" v-html="parseContent(item.content)" @click="showImg(item)"></div>
                                 <span v-if="item.system">{{item.time}}</span>
@@ -444,11 +445,13 @@
                         );
                     },
                     imgByUserId(user_id){
-                        console.log(user_id)
-                        console.log(this.group)
                         var target = _.where(this.group,{'id':user_id})[0];
-                        console.log(target)
                         return target['head_img'];
+                    },
+                    nicknameByUserId(user_id)
+                    {
+                        var target = _.where(this.group,{'id':user_id})[0];
+                        return target['real_name'];
                     },
                     uploadImg(){
                         this.$refs.filElem.dispatchEvent(new MouseEvent('click'))
