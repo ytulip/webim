@@ -30,6 +30,23 @@
     {
         z-index: 999999999 !important;
     }
+
+    .layim-chat-main ul .layim-chat-mine {
+        padding-right: 0;
+    }
+
+    .layim-chat-main ul li {
+        padding-left: 0;
+    }
+
+
+    .layim-chat-user cite {
+        left:0;
+    }
+
+    .layim-chat-mine .layim-chat-user cite {
+        right:0;
+    }
 </style>
 <body>
 
@@ -44,7 +61,7 @@
 
                             <li v-for="(item,index) in list" v-bind:class="{'layim-chat-mine':(item.user_id == current_user_id),'layim-chat-system':item.system,'layim-chat-li':!item.system}">
                                 <div class="layim-chat-user" v-if="!item.system">
-                                    <img :src="imgByUserId(item.user_id)">
+                                    <!--<img :src="imgByUserId(item.user_id)">-->
                                     <cite>{{nicknameByUserId(item.user_id)}}</cite>
                                 </div>
                                 <div class="layim-chat-text" v-if="!item.system" v-html="parseContent(item.content)" @click="showImg(item)"></div>
