@@ -24,14 +24,25 @@
         max-width: 140px;
     }
 
-    .van-image-preview__overlay
-    {
-        z-index:  999999999 !important;
-    }
 
     .van-image-preview
     {
         z-index: 999999999 !important;
+    }
+
+    .van-overlay
+    {
+        z-index: 9999999999 !important;
+    }
+
+    .van-popup--bottom
+    {
+        z-index: 9999999999 !important;
+    }
+
+    .van-image-preview__overlay
+    {
+        z-index:  999999999 !important;
     }
 
     .layim-chat-main ul .layim-chat-mine {
@@ -49,6 +60,11 @@
 
     .layim-chat-mine .layim-chat-user cite {
         right:0;
+    }
+
+    .f-000000-4-6-m
+    {
+        color: #ffffff;
     }
 </style>
 <body>
@@ -108,6 +124,23 @@
     >
     </van-image-preview>
 
+    <van-popup
+            v-model="repaymentShow"
+            position="bottom"
+            :overlay="false"
+            :style="{ height: 'auto' }"
+    >
+        <div style="background-color: #f5f5f5;">
+
+            <div class="f-000000-4-6-m" style="background-color: #ffffff;line-height: 1.5rem;width: 100%;border: 0.025rem solid #e5e5e5;">
+                保存到相册
+            </div>
+
+
+            <div class="f-000000-4-6-m" style="background-color: #ffffff;line-height: 1.5rem;width: 100%;margin-top: .2rem;" @click="repaymentShow = false">取消</div>
+        </div>
+    </van-popup>
+
 </div>
 <!--<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
 <script src="https://cdn.jsdelivr.net/npm/vue"></script>
@@ -118,6 +151,61 @@
 <script src="../js/moment.min.js"></script>
 <script src="../js/zh-cn.js"></script>
 <script>
+
+    document.addEventListener('touchstart',touch, false);
+    document.addEventListener('touchmove',touch, false);
+    document.addEventListener('touchend',touch, false);
+
+    var startFlag = false
+
+    function touch (event){
+        var event = event || window.event;
+        var target = event.target;
+        // var oInp = document.getElementById("inp");
+        //
+
+
+        switch(event.type){
+            case "touchstart":
+                if( target.classList.contains("van-swipe-item") )
+                {
+                    //触控开始, 倒计时开始
+                    console.log('触控开始')
+                    if( !startFlag ) {
+                        startFlag = true;
+                        setTimeout(function () {
+                            // 从底部推出保存图片选项
+
+                            if( startFlag == true)
+                            {
+                                console.log('弹出弹层');
+                                appVue.repaymentShow = true;
+                            }
+                            startFlag = false;
+                        }, 3000)
+                    }
+                }
+                break;
+                // oInp.innerHTML = "Touch started (" + event.touches[0].clientX + "," + event.touches[0].clientY + ")";
+                // break;
+            case "touchend":
+                if( target.classList.contains("van-swipe-item") )
+                {
+                    //触控结束
+                    startFlag = false;
+                    console.log('触控结束')
+                }
+                break;
+            case "touchmove":
+                if( target.classList.contains("van-swipe-item") )
+                {
+                    //触控开始
+                    console.log('触控移动')
+                }
+                break;
+        }
+
+    }
 
     var vant = window.vant;
     // 注册组件
@@ -142,7 +230,7 @@
         if (r != null) return unescape(r[2]); return null;
     }
 
-    new Vue(
+    var appVue = new Vue(
         {
             el:'#app',
             data:{
@@ -235,7 +323,8 @@
                     {'src':'../layer/images/face/71.gif','title':'[蛋糕]'},
                 ],
                 images:[],
-                show:false
+                show:false,
+                repaymentShow:false
             },
             created:function () {
                 this.user_id = getQueryString('user_id'),
