@@ -76,6 +76,16 @@
     img{
         pointer-events:none;/* 禁止长按图片保存 */
     }
+
+
+    #save_img_pop{
+        -webkit-user-select:none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select:none;/*禁用页面内容选中和复制操作*/
+        -webkit-touch-callout:none;/*禁用长按页面时的弹出菜单(iOS下有效)*/
+        -webkit-tap-highlight-color:rgba(0,0,0,0);/*去掉点击链接和文本框对象时默认的灰色半透明覆盖层(iOS)或者虚框(Android)*/
+    }
 </style>
 <body>
 <div id="app" class="vue-dpn">
@@ -140,7 +150,7 @@
             :overlay="false"
             :style="{ height: 'auto' }"
     >
-        <div style="background-color: #f5f5f5;">
+        <div style="background-color: #f5f5f5;" id="save_img_pop">
 
             <div class="f-000000-4-6-m" style="background-color: #ffffff;width: 100%;border: 0.025rem solid #e5e5e5;" @click="saveToLocal">
                 保存到相册
@@ -363,6 +373,15 @@
                 // console.log(this.current_user_id),
                 // console.log(this.user_avatar),
                 // console.log(this.current_user_avatar)
+            },
+            watch:{
+                show(val)
+                {
+                    if( !this.val )
+                    {
+                        this.repaymentShow = false;
+                    }
+                }
             },
             mounted:function(){
                 // alert(3);
