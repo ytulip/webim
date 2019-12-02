@@ -62,9 +62,10 @@
         right:0;
     }
 
-    .f-000000-4-6-m
-    {
-        color: #ffffff;
+    .f-000000-4-6-m{
+        text-align: center;
+        font-size: 16px;
+        padding: 12px 0;
     }
 </style>
 <body>
@@ -132,12 +133,12 @@
     >
         <div style="background-color: #f5f5f5;">
 
-            <div class="f-000000-4-6-m" style="background-color: #ffffff;line-height: 1.5rem;width: 100%;border: 0.025rem solid #e5e5e5;">
+            <div class="f-000000-4-6-m" style="background-color: #ffffff;width: 100%;border: 0.025rem solid #e5e5e5;">
                 保存到相册
             </div>
 
 
-            <div class="f-000000-4-6-m" style="background-color: #ffffff;line-height: 1.5rem;width: 100%;margin-top: .2rem;" @click="repaymentShow = false">取消</div>
+            <div class="f-000000-4-6-m" style="background-color: #ffffff;width: 100%;margin-top: .2rem;" @click="repaymentShow = false">取消</div>
         </div>
     </van-popup>
 
@@ -351,7 +352,7 @@
                 this.pushList({'system':true,'time':moment().format('MM-DD HH:mm')})
                 this.loading_layer = false
 
-                setTimeout(this.newMessage, 3000);
+                setTimeout(this.newMessage, 2000);
             },
             methods:
                 {
