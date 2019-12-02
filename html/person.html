@@ -67,6 +67,11 @@
         font-size: 16px;
         padding: 12px 0;
     }
+
+    .van-toast
+    {
+        z-index: 9999999999 !important;
+    }
 </style>
 <body>
 <div id="app" class="vue-dpn">
@@ -133,7 +138,7 @@
     >
         <div style="background-color: #f5f5f5;">
 
-            <div class="f-000000-4-6-m" style="background-color: #ffffff;width: 100%;border: 0.025rem solid #e5e5e5;">
+            <div class="f-000000-4-6-m" style="background-color: #ffffff;width: 100%;border: 0.025rem solid #e5e5e5;" @click="saveToLocal">
                 保存到相册
             </div>
 
@@ -152,23 +157,35 @@
 <script src="../js/moment.min.js"></script>
 <script src="../js/zh-cn.js"></script>
 <script>
-
     document.addEventListener('touchstart',touch, false);
     document.addEventListener('touchmove',touch, false);
     document.addEventListener('touchend',touch, false);
 
     var startFlag = false
 
+    function imgSaveCallback(flag)
+    {
+        if(flag)
+        {
+            cAlert('保存成功')
+        }else
+        {
+            cAlert('保存失败')
+        }
+    }
+
     function touch (event){
         var event = event || window.event;
         var target = event.target;
+
+        console.log(target.classList)
         // var oInp = document.getElementById("inp");
         //
 
 
         switch(event.type){
             case "touchstart":
-                if( target.classList.contains("van-swipe-item") )
+                if( target.classList.contains("van-image-preview__image") )
                 {
                     //触控开始, 倒计时开始
                     console.log('触控开始')
@@ -190,7 +207,7 @@
                 // oInp.innerHTML = "Touch started (" + event.touches[0].clientX + "," + event.touches[0].clientY + ")";
                 // break;
             case "touchend":
-                if( target.classList.contains("van-swipe-item") )
+                if( target.classList.contains("van-image-preview__image") )
                 {
                     //触控结束
                     startFlag = false;
@@ -198,7 +215,7 @@
                 }
                 break;
             case "touchmove":
-                if( target.classList.contains("van-swipe-item") )
+                if( target.classList.contains("van-image-preview__image") )
                 {
                     //触控开始
                     console.log('触控移动')
@@ -356,6 +373,16 @@
             },
             methods:
                 {
+                    saveToLocal()
+                    {
+                        this.repaymentShow = false;
+                        vant.Toast({ message: '保存中'});
+                        try {
+                            ImageSaver.postMessage(this.images[0]);
+                        }catch{
+                            console.log('保存图片'+this.images[0]+'失败')
+                        }
+                    },
                     getHistoryMessage()
                     {
                         var _self = this;
