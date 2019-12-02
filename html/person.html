@@ -189,7 +189,7 @@
 
         switch(event.type){
             case "touchstart":
-                if( target.classList.contains("van-image-preview__image") )
+                if( target.classList.contains("van-swipe-item") )
                 {
                     //触控开始, 倒计时开始
                     console.log('触控开始')
@@ -211,7 +211,7 @@
                 // oInp.innerHTML = "Touch started (" + event.touches[0].clientX + "," + event.touches[0].clientY + ")";
                 // break;
             case "touchend":
-                if( target.classList.contains("van-image-preview__image") )
+                if( target.classList.contains("van-swipe-item") )
                 {
                     //触控结束
                     startFlag = false;
@@ -219,7 +219,7 @@
                 }
                 break;
             case "touchmove":
-                if( target.classList.contains("van-image-preview__image") )
+                if( target.classList.contains("van-swipe-item") )
                 {
                     //触控开始
                     console.log('触控移动')
