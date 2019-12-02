@@ -110,7 +110,7 @@
             <cite v-if="item.user_id == current_user_id">{{current_nickname}}</cite>
             <cite v-else>{{nickname}}</cite>
         </div>
-        <div class="layim-chat-text" v-if="!item.system" v-html="parseContent(item.content)" @click="showImg(item)"></div>
+        <div class="layim-chat-text" v-if="!item.system" v-html="parseContent(item.content)" @click="showImg(item)" @dblclick="getInfo(item)"></div>
         <span v-if="item.system">{{item.time}}</span>
     </li>
 
@@ -195,24 +195,22 @@
         var event = event || window.event;
         var target = event.target;
 
-        console.log(target.classList)
+        // console.log(target.classList)
         // var oInp = document.getElementById("inp");
         //
 
 
         switch(event.type){
             case "touchstart":
-                if( target.classList.contains("van-swipe-item") )
-                {
+                if( target.classList.contains("van-swipe-item") ) {
                     //触控开始, 倒计时开始
                     console.log('触控开始')
-                    if( !startFlag ) {
+                    if (!startFlag) {
                         startFlag = true;
                         setTimeout(function () {
                             // 从底部推出保存图片选项
 
-                            if( startFlag == true)
-                            {
+                            if (startFlag == true) {
                                 console.log('弹出弹层');
                                 appVue.repaymentShow = true;
                             }
@@ -276,7 +274,7 @@
                 last_id:'',
                 list:[],
                 send_content:'',
-                host:'http://m.houseofprayers.net:9988',
+                host:'https://m.houseofprayers.net:9988',
                 send_ids:[],
                 days:[],
                 face_layer:false,
@@ -399,6 +397,10 @@
             },
             methods:
                 {
+                    getInfo(item)
+                    {
+                        console.log(item)
+                    },
                     saveToLocal()
                     {
                         this.repaymentShow = false;
