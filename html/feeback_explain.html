@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0;minimum-scale=1.0, maximum-scale=1.0;user-scalable=no;">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    <title>投诉须知</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vant@2.0/lib/index.css">
+
+</head>
+<style>
+</style>
+<body>
+
+<div id="app" class="vue-dpn">
+    <div style="text-align: center;padding: 30px 0 20px 0;">投诉须知</div>
+    <p style="font-size: 12px;padding: 0 12px;">你应保证你的投诉行为基于善意，并代表你本人真实意思。祷告殿作为中立平台服务者，收到你投诉后，会尽快按照相关法律法规的规定独立判断并进行处理。祷告殿将会采取合理的措施保护你的个人信息；除法律法规规定的情形外，未经用户许可祷告殿不会向第三方公开、透露你的个人信息。</p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vant@2.0/lib/vant.min.js"></script>
+<script src="../js/jquery.min.js"></script>
+<script src="../js/base64.min.js"></script>
+<script>
+    var vant = window.vant;
+    // 注册组件
+    Vue.use(vant);
+
+    new Vue(
+        {
+            el:'#app',
+            data:{
+            },
+            created:function () {
+            },
+            mounted:function(){
+            },
+            methods:
+                {
+                    doFeeback()
+                    {
+                        vant.Toast('您已投诉成功！')
+                    }
+                },
+            computed:{
+                faceArr:function()
+                {
+                }
+            }
+        }
+    )
+
+
+</script>
+</body>
+</html>
