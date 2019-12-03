@@ -110,7 +110,7 @@
             <cite v-if="item.user_id == current_user_id">{{current_nickname}}</cite>
             <cite v-else>{{nickname}}</cite>
         </div>
-        <div class="layim-chat-text" v-if="!item.system" v-html="parseContent(item.content)" @click="showImg(item)" @dblclick="getInfo(item)"></div>
+        <div class="layim-chat-text" v-if="!item.system" v-html="parseContent(item.content)" @click="showImg(item)"></div>
         <span v-if="item.system">{{item.time}}</span>
     </li>
 
@@ -217,6 +217,10 @@
                             startFlag = false;
                         }, 1000)
                     }
+                }else if( target.classList.contains('layim-chat-text') )
+                {
+                    // console.log('是要复制文本了吗')
+                    console.log(target)
                 }
                 break;
                 // oInp.innerHTML = "Touch started (" + event.touches[0].clientX + "," + event.touches[0].clientY + ")";
