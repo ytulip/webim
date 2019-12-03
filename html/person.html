@@ -50,6 +50,11 @@
     .layim-chat-mine .layim-chat-user cite {
         right:0;
     }
+
+    .van-toast
+    {
+        z-index: 9999999999 !important;
+    }
 </style>
 <body>
 <div id="app" class="vue-dpn">
@@ -109,6 +114,14 @@
     </van-image-preview>
 
 </div>
+
+<!--复制功能-->
+<input id="foo" value="">
+
+<!-- Trigger -->
+<button class="btn" data-clipboard-target="#foo">
+</button>
+
 <!--<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
 <script src="https://cdn.jsdelivr.net/npm/vue"></script>
 <script src="https://cdn.jsdelivr.net/npm/vant@2.0/lib/vant.min.js"></script>
@@ -117,6 +130,7 @@
 <script src="../js/underscore.js"></script>
 <script src="../js/moment.min.js"></script>
 <script src="../js/zh-cn.js"></script>
+<script src="../js/clipboard.min.js"></script>
 <script>
 
     var vant = window.vant;
@@ -124,6 +138,18 @@
     Vue.use(vant);
 
     moment.locale("zh-cn");
+
+    var clipboard = new ClipboardJS('.btn');
+
+    clipboard.on('success', function(e) {
+        // alert('复制成功');
+        vant.Toast({ message: '复制成功', duration: 200});
+        e.clearSelection();
+    });
+
+    clipboard.on('error', function(e) {
+        // alert('复制失败');
+    });
 
     /*加载动画*/
     function cAlert(msg)
@@ -574,6 +600,8 @@
                     {
                         if( item.content.indexOf('<img') !== 0 )
                         {
+                            $('#foo').val(item.content);
+                            $('.btn').trigger('click');
                             return;
                         }
                         //TODO 去截取图片路径部分
