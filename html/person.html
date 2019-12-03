@@ -24,25 +24,14 @@
         max-width: 140px;
     }
 
+    .van-image-preview__overlay
+    {
+        z-index:  999999999 !important;
+    }
 
     .van-image-preview
     {
         z-index: 999999999 !important;
-    }
-
-    .van-overlay
-    {
-        z-index: 9999999999 !important;
-    }
-
-    .van-popup--bottom
-    {
-        z-index: 9999999999 !important;
-    }
-
-    .van-image-preview__overlay
-    {
-        z-index:  999999999 !important;
     }
 
     .layim-chat-main ul .layim-chat-mine {
@@ -60,34 +49,6 @@
 
     .layim-chat-mine .layim-chat-user cite {
         right:0;
-    }
-
-    .f-000000-4-6-m{
-        text-align: center;
-        font-size: 16px;
-        padding: 12px 0;
-    }
-
-    .van-toast
-    {
-        z-index: 9999999999 !important;
-    }
-
-    img{
-        pointer-events:none;/* 禁止长按图片保存 */
-    }
-
-    /*.van-image-preview__index{*/
-        /*display: none;*/
-    /*}*/
-
-    *{
-        -webkit-user-select:none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select:none;/*禁用页面内容选中和复制操作*/
-        -webkit-touch-callout:none;/*禁用长按页面时的弹出菜单(iOS下有效)*/
-        -webkit-tap-highlight-color:rgba(0,0,0,0);/*去掉点击链接和文本框对象时默认的灰色半透明覆盖层(iOS)或者虚框(Android)*/
     }
 </style>
 <body>
@@ -147,23 +108,6 @@
     >
     </van-image-preview>
 
-    <van-popup
-            v-model="repaymentShow"
-            position="bottom"
-            :overlay="false"
-            :style="{ height: 'auto' }"
-    >
-        <div style="background-color: #f5f5f5;" id="save_img_pop">
-
-            <div class="f-000000-4-6-m" style="background-color: #ffffff;width: 100%;border: 0.025rem solid #e5e5e5;" @click="saveToLocal">
-                保存到相册
-            </div>
-
-
-            <div class="f-000000-4-6-m" style="background-color: #ffffff;width: 100%;margin-top: .2rem;" @click="repaymentShow = false">取消</div>
-        </div>
-    </van-popup>
-
 </div>
 <!--<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
 <script src="https://cdn.jsdelivr.net/npm/vue"></script>
@@ -174,75 +118,6 @@
 <script src="../js/moment.min.js"></script>
 <script src="../js/zh-cn.js"></script>
 <script>
-    document.addEventListener('touchstart',touch, false);
-    document.addEventListener('touchmove',touch, false);
-    document.addEventListener('touchend',touch, false);
-
-    var startFlag = false
-
-    function imgSaveCallback(flag)
-    {
-        if(flag)
-        {
-            cAlert('保存成功')
-        }else
-        {
-            cAlert('保存失败')
-        }
-    }
-
-    function touch (event){
-        var event = event || window.event;
-        var target = event.target;
-
-        // console.log(target.classList)
-        // var oInp = document.getElementById("inp");
-        //
-
-
-        switch(event.type){
-            case "touchstart":
-                if( target.classList.contains("van-swipe-item") ) {
-                    //触控开始, 倒计时开始
-                    console.log('触控开始')
-                    if (!startFlag) {
-                        startFlag = true;
-                        setTimeout(function () {
-                            // 从底部推出保存图片选项
-
-                            if (startFlag == true) {
-                                console.log('弹出弹层');
-                                appVue.repaymentShow = true;
-                            }
-                            startFlag = false;
-                        }, 1000)
-                    }
-                }else if( target.classList.contains('layim-chat-text') )
-                {
-                    // console.log('是要复制文本了吗')
-                    console.log(target)
-                }
-                break;
-                // oInp.innerHTML = "Touch started (" + event.touches[0].clientX + "," + event.touches[0].clientY + ")";
-                // break;
-            case "touchend":
-                if( target.classList.contains("van-swipe-item") )
-                {
-                    //触控结束
-                    startFlag = false;
-                    console.log('触控结束')
-                }
-                break;
-            case "touchmove":
-                if( target.classList.contains("van-swipe-item") )
-                {
-                    //触控开始
-                    console.log('触控移动')
-                }
-                break;
-        }
-
-    }
 
     var vant = window.vant;
     // 注册组件
@@ -267,7 +142,7 @@
         if (r != null) return unescape(r[2]); return null;
     }
 
-    var appVue = new Vue(
+    new Vue(
         {
             el:'#app',
             data:{
@@ -278,7 +153,7 @@
                 last_id:'',
                 list:[],
                 send_content:'',
-                host:'https://m.houseofprayers.net:9988',
+                host:'http://m.houseofprayers.net:9988',
                 send_ids:[],
                 days:[],
                 face_layer:false,
@@ -360,8 +235,7 @@
                     {'src':'../layer/images/face/71.gif','title':'[蛋糕]'},
                 ],
                 images:[],
-                show:false,
-                repaymentShow:false
+                show:false
             },
             created:function () {
                 this.user_id = getQueryString('user_id'),
@@ -379,15 +253,6 @@
                 // console.log(this.user_avatar),
                 // console.log(this.current_user_avatar)
             },
-            watch:{
-                show(val)
-                {
-                    if( !this.val )
-                    {
-                        this.repaymentShow = false;
-                    }
-                }
-            },
             mounted:function(){
                 // alert(3);
                 $('.vue-dpn').removeClass('vue-dpn');
@@ -397,24 +262,10 @@
                 this.pushList({'system':true,'time':moment().format('MM-DD HH:mm')})
                 this.loading_layer = false
 
-                setTimeout(this.newMessage, 2000);
+                setTimeout(this.newMessage, 3000);
             },
             methods:
                 {
-                    getInfo(item)
-                    {
-                        console.log(item)
-                    },
-                    saveToLocal()
-                    {
-                        this.repaymentShow = false;
-                        vant.Toast({ message: '保存中'});
-                        try {
-                            ImageSaver.postMessage(this.images[0]);
-                        }catch{
-                            console.log('保存图片'+this.images[0]+'失败')
-                        }
-                    },
                     getHistoryMessage()
                     {
                         var _self = this;
