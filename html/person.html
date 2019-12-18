@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1.0;minimum-scale=1.0, maximum-scale=1.0;user-scalable=no;">
-    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <title></title>
     <link rel="stylesheet" href="../layer/css/layui.mobile.css" media="all">
     <link rel="stylesheet" href="../layer/css/modules/layim/mobile/layim.css?v=2.10" media="all">
@@ -160,6 +159,17 @@
 
         }
     }
+
+    function scrollChatBottom()
+    {
+        // console.log($('.layim-chat-main')[0].scrollHeight)
+
+        // $('.layim-chat-main')[0].scrollTop = $('.layim-chat-main')[0].scrollHeight
+
+        setTimeout(function () {
+            $('.layim-chat-main')[0].scrollTop = $('.layim-chat-main')[0].scrollHeight
+        },200)
+    }
     
 
     function getQueryString(name) {
@@ -179,7 +189,7 @@
                 last_id:'',
                 list:[],
                 send_content:'',
-                host:'http://m.houseofprayers.net:9988',
+                host:'https://m.houseofprayers.net:9988',
                 send_ids:[],
                 days:[],
                 face_layer:false,
@@ -287,6 +297,7 @@
 
                 this.pushList({'system':true,'time':moment().format('MM-DD HH:mm')})
                 this.loading_layer = false
+                scrollChatBottom();
 
                 setTimeout(this.newMessage, 3000);
             },
@@ -409,6 +420,7 @@
                                                 }
                                                 _self.pushList(data.data.data[i - 1]);
                                             }
+                                            scrollChatBottom();
                                         }else
                                         {
                                             _self.last_id = data.data;
@@ -493,6 +505,7 @@
                         this.send_content = '';
                         this.send_ids.push(send_id);
                         this.pushList({id:'','content':content,'user_id':this.current_user_id})
+                        scrollChatBottom();
 
                         /*发送消息*/
                         $.ajax(
