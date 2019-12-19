@@ -1,0 +1,675 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0;minimum-scale=1.0, maximum-scale=1.0;user-scalable=no;">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    <title></title>
+    <link rel="stylesheet" href="../layer/css/layui.mobile.css" media="all">
+    <link rel="stylesheet" href="../layer/css/modules/layim/mobile/layim.css?v=2.10" media="all">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vant@2.0/lib/index.css">
+
+</head>
+<style>
+
+    html,body,#app{
+        height: 100%;
+    }
+
+    #app{
+        position: relative;
+    }
+
+    #wrapper
+    {
+        height: 100%;
+        width: 100%;
+        position: relative;
+        box-sizing: border-box;
+        background: rgb(252, 252, 252);
+        overflow: hidden;
+    }
+
+    .vue-dpn
+    {
+        display: none;
+    }
+
+    .layim-chat-text img{
+        max-width: 140px;
+    }
+
+    .van-image-preview__overlay
+    {
+        z-index:  999999999 !important;
+    }
+
+    .van-image-preview
+    {
+        z-index: 999999999 !important;
+    }
+
+    .layim-chat-main ul .layim-chat-mine {
+        padding-right: 0;
+    }
+
+    .layim-chat-main ul li {
+        padding-left: 0;
+    }
+
+
+    .layim-chat-user cite {
+        left:0;
+    }
+
+    .layim-chat-mine .layim-chat-user cite {
+        right:0;
+    }
+
+    .van-toast
+    {
+        z-index: 9999999999 !important;
+    }
+
+    .send_box{
+        display: block;
+        width: 100%;
+        font-size: 13px;
+        line-height: 20px;
+        padding: 10px 10px;
+        outline: 0px;
+        background: rgb(255, 255, 255);
+        border-width: initial;
+        border-style: none;
+        border-color: initial;
+        border-image: initial;
+    }
+
+    .layim-chat-li
+    {
+        position: relative;
+    }
+
+    .layim-chat-mine
+    {
+        text-align: right;
+    }
+
+    .layim-chat-system
+    {
+        text-align: center;
+    }
+</style>
+<body>
+
+<div id="app" class="vue-dpn">
+    <div id="wrapper">
+        <div style="width: 100%;height: 100%;box-sizing: border-box;padding-bottom: 50px;overflow-y: scroll;overflow-x:hidden;-webkit-overflow-scrolling: touch;background: #F8F8F8;" ref="chatMain" @click="mainClick" class="chat-panel">
+            <ul style="padding: 0 12px 50px 12px;box-sizing: border-box;">
+                <li v-for="(item,index) in list" v-bind:class="{'layim-chat-mine':(item.user_id == current_user_id),'layim-chat-system':item.system,'layim-chat-li':!item.system}">
+                    <div class="layim-chat-user" v-if="!item.system">
+                        <!--<img :src="current_user_avatar" v-if="item.user_id == current_user_id">-->
+                        <!--<img :src="user_avatar" v-else>-->
+                        <cite v-if="item.user_id == current_user_id">{{current_nickname}}</cite>
+                        <cite v-else>{{nickname}}</cite>
+                    </div>
+                    <div class="layim-chat-text" v-if="!item.system" v-html="parseContent(item.content)" @click="showImg(item)"></div>
+                    <span v-if="item.system">{{item.time}}</span>
+                </li>
+            </ul>
+
+        </div>
+
+        <div style="width: 100%;position: absolute;left: 0px;right: 0px;bottom: 55px;z-index: 100;background-color: #ffffff;" v-if="face_layer">
+            <ul class="layui-layim-face" >
+
+                <li v-for="(item,index) in face_config" :title="item.title" @click="addFace(item)"><img :src="item.src"/></li>
+
+            </ul>
+        </div>
+
+
+        <div style="width: 100%;position: absolute;left: 0px;right: 0px;bottom: 0px;z-index: 99;">
+            <div style="width: 100%; height: 50px;background: rgb(252, 252, 252);">
+                <div style="height: 100%; width: 100%;position: relative;box-sizing: border-box;border-top: 1px solid rgb(237, 237, 237);">
+                    <div style="position: relative;height: 50px;box-sizing: border-box;display: flex;flex-direction: row;padding: 5px 10px 5px 14px;font-size:0;">
+                        <div style="display: inline-block;vertical-align: middle;width: 25%;">
+                            <span @click="chosenFace">
+                            <van-icon name="smile-o" size="16" :style="{'margin-left':'12px', 'line-height':'40px'}"/>
+                            </span>
+
+                            <span style="margin-left: 12px;" @click="uploadImg">
+                            <van-icon name="photo-o" size="16" :style="{'margin-left':'12px', 'line-height':'40px'}"/>
+                            </span>
+                        </div>
+                        <div style="display: inline-block;vertical-align: middle;font-size: 0;width: 60%">
+                            <form action="javascript:send();" style="height: 100%;">
+                                <input style="" class="send_box" type="text" placeholder="请输入" v-model="send_content" @focus="sendFocus"  @blur="blurIn3"/>
+                            </form>
+                        </div>
+
+                        <div style="line-height: 40px;display: inline-block;font-size: 12px;width: 15%;text-align: center;" @click="sendMsg"><span style="color: rgb(25,127,250)">发送</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--复制功能-->
+        <input id="foo" value="" style="position: absolute;left: 0;right: 0;bottom: 0;z-index: 1">
+
+        <!-- Trigger -->
+        <button class="btn" data-clipboard-target="#foo" style="position: absolute;left: 0;right: 0;bottom: 0;z-index: 1">
+        </button>
+    </div>
+
+
+    <form style="display: none;" id="data-form">
+        <input id="fileTarget" ref="filElem" type="file" name="file"  style="display: none" accept="image/gif,image/jpeg,image/png"  @change="getFile"/>
+    </form>
+
+    <van-image-preview
+            v-model="show"
+            :images="images"
+    >
+    </van-image-preview>
+
+
+</div>
+
+<script src="../layer/layui.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vant@2.0/lib/vant.min.js"></script>
+<script src="../js/jquery.min.js"></script>
+<script src="../js/base64.min.js"></script>
+<script src="https://underscorejs.net/underscore.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.20.1/moment.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.20.1/locale/zh-cn.js"></script>
+<script>
+
+    moment.locale("zh-cn");
+
+    function getQueryString(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) return unescape(r[2]); return null;
+    }
+
+    new Vue(
+        {
+            el:'#app',
+            data:{
+                user_id:'',
+                current_user_id:'',
+                user_avatar:'',
+                current_user_avatar:'',
+                last_id:'',
+                list:[],
+                send_content:'',
+                host:'http://m.houseofprayers.net:9988',
+                send_ids:[],
+                group_id:'',
+                group:[],
+                days:[],
+                face_layer:false,
+                face_config:[
+                    {'src':'../layer/images/face/0.gif','title':'[微笑]'},
+                    {'src':'../layer/images/face/1.gif','title':'[嘻嘻]'},
+                    {'src':'../layer/images/face/2.gif','title':'[哈哈]'},
+                    {'src':'../layer/images/face/3.gif','title':'[可爱]'},
+                    {'src':'../layer/images/face/4.gif','title':'[可怜]'},
+                    {'src':'../layer/images/face/5.gif','title':'[挖鼻]'},
+                    {'src':'../layer/images/face/6.gif','title':'[吃惊]'},
+                    {'src':'../layer/images/face/7.gif','title':'[害羞]'},
+                    {'src':'../layer/images/face/8.gif','title':'[挤眼]'},
+                    {'src':'../layer/images/face/9.gif','title':'[闭嘴]'},
+                    {'src':'../layer/images/face/10.gif','title':'[鄙视]'},
+                    {'src':'../layer/images/face/11.gif','title':'[爱你]'},
+                    {'src':'../layer/images/face/12.gif','title':'[泪]'},
+                    {'src':'../layer/images/face/13.gif','title':'[偷笑]'},
+                    {'src':'../layer/images/face/14.gif','title':'[亲亲]'},
+                    {'src':'../layer/images/face/15.gif','title':'[亲亲]'},
+                    {'src':'../layer/images/face/16.gif','title':'[生病]'},
+                    {'src':'../layer/images/face/17.gif','title':'[太开心]'},
+                    {'src':'../layer/images/face/18.gif','title':'[白眼]'},
+                    {'src':'../layer/images/face/19.gif','title':'[右哼哼]'},
+                    {'src':'../layer/images/face/20.gif','title':'[左哼哼]'},
+                    {'src':'../layer/images/face/21.gif','title':'[嘘]'},
+                    {'src':'../layer/images/face/22.gif','title':'[衰]'},
+                    {'src':'../layer/images/face/23.gif','title':'[委屈]'},
+                    {'src':'../layer/images/face/24.gif','title':'[吐]'},
+                    {'src':'../layer/images/face/25.gif','title':'[抱抱]'},
+                    {'src':'../layer/images/face/26.gif','title':'[怒]'},
+                    {'src':'../layer/images/face/27.gif','title':'[疑问]'},
+                    {'src':'../layer/images/face/28.gif','title':'[馋嘴]'},
+                    {'src':'../layer/images/face/29.gif','title':'[拜拜]'},
+                    {'src':'../layer/images/face/30.gif','title':'[思考]'},
+                    {'src':'../layer/images/face/31.gif','title':'[汗]'},
+                    {'src':'../layer/images/face/32.gif','title':'[困]'},
+                    {'src':'../layer/images/face/33.gif','title':'[睡]'},
+                    {'src':'../layer/images/face/34.gif','title':'[钱]'},
+                    {'src':'../layer/images/face/35.gif','title':'[失望]'},
+                    {'src':'../layer/images/face/36.gif','title':'[酷]'},
+                    {'src':'../layer/images/face/37.gif','title':'[色]'},
+                    {'src':'../layer/images/face/38.gif','title':'[哼]'},
+                    {'src':'../layer/images/face/39.gif','title':'[鼓掌]'},
+                    {'src':'../layer/images/face/40.gif','title':'[晕]'},
+                    {'src':'../layer/images/face/41.gif','title':'[悲伤]'},
+                    {'src':'../layer/images/face/42.gif','title':'[抓狂]'},
+                    {'src':'../layer/images/face/43.gif','title':'[黑线]'},
+                    {'src':'../layer/images/face/44.gif','title':'[阴险]'},
+                    {'src':'../layer/images/face/45.gif','title':'[怒骂]'},
+                    {'src':'../layer/images/face/46.gif','title':'[互粉]'},
+                    {'src':'../layer/images/face/47.gif','title':'[心]'},
+                    {'src':'../layer/images/face/48.gif','title':'[伤心]'},
+                    {'src':'../layer/images/face/49.gif','title':'[猪头]'},
+                    {'src':'../layer/images/face/50.gif','title':'[熊猫]'},
+                    {'src':'../layer/images/face/51.gif','title':'[兔子]'},
+                    {'src':'../layer/images/face/52.gif','title':'[ok]'},
+                    {'src':'../layer/images/face/53.gif','title':'[耶]'},
+                    {'src':'../layer/images/face/54.gif','title':'[good]'},
+                    {'src':'../layer/images/face/55.gif','title':'[NO]'},
+                    {'src':'../layer/images/face/56.gif','title':'[赞]'},
+                    {'src':'../layer/images/face/57.gif','title':'[来]'},
+                    {'src':'../layer/images/face/58.gif','title':'[弱]'},
+                    {'src':'../layer/images/face/59.gif','title':'[草泥马]'},
+                    {'src':'../layer/images/face/60.gif','title':'[神马]'},
+                    {'src':'../layer/images/face/61.gif','title':'[囧]'},
+                    {'src':'../layer/images/face/62.gif','title':'[浮云]'},
+                    {'src':'../layer/images/face/63.gif','title':'[给力]'},
+                    {'src':'../layer/images/face/64.gif','title':'[围观]'},
+                    {'src':'../layer/images/face/65.gif','title':'[威武]'},
+                    {'src':'../layer/images/face/66.gif','title':'[奥特曼]'},
+                    {'src':'../layer/images/face/67.gif','title':'[礼物]'},
+                    {'src':'../layer/images/face/68.gif','title':'[钟]'},
+                    {'src':'../layer/images/face/69.gif','title':'[话筒]'},
+                    {'src':'../layer/images/face/70.gif','title':'[蜡烛]'},
+                    {'src':'../layer/images/face/71.gif','title':'[蛋糕]'},
+                ],
+                images:[],
+                show:false
+            },
+            created:function () {
+                this.group_id = getQueryString('group_id'),
+                    this.current_user_id = getQueryString('current_user_id'),
+                    this.user_avatar = getQueryString('user_avatar'),
+                    this.current_user_avatar = getQueryString('current_user_avatar')
+                this.token = getQueryString('token')
+
+
+                document.title = Base64.decode(getQueryString('group_name'))
+
+
+                // this.getGroupList();
+                // console.log(this.user_id),
+                // console.log(this.current_user_id),
+                // console.log(this.user_avatar),
+                // console.log(this.current_user_avatar)
+            },
+            mounted:function(){
+                // alert(3);
+                $('.vue-dpn').removeClass('vue-dpn');
+
+                //添加当前时间
+                this.getGroupList();
+                // setTimeout(this.newMessage, 3000);
+            },
+            methods:
+                {
+                    parseContent(content)
+                    {
+                        //如果是图片那么特殊处理
+                        if( content.indexOf('<img') == 0 )
+                        {
+                            return content.replace('src="','src="' + this.host);
+                        }
+
+
+                        var _self = this;
+                        return content.replace(/face\[[\u4e00-\u9fa5]+\]/g, function (match) {
+                            match = match.replace('face','')
+                            return '<img alt="'+match+'" title="'+match+'" src="'+_self.getFaceImg(match)+'">';
+                        });
+                    },
+                    getFaceImg(text)
+                    {
+                        var target = _.where(this.face_config,{'title':text})[0]
+                        return target['src']
+                    },
+                    mainClick()
+                    {
+                        this.face_layer = false;
+                    },
+                    /**
+                     * 添加表情包
+                     */
+                    addFace(item)
+                    {
+                        this.send_content += 'face'+item['title']+' ';
+                        this.face_layer = false;
+                    },
+                    chosenFace()
+                    {
+                        this.face_layer = true;
+                    },
+                    getHistoryMessage()
+                    {
+                        var _self = this;
+                        //这里去加载历史聊天记录
+                        $.ajax(
+                            {
+                                'url': _self.host + '/api/chat_message',
+                                'type': 'post',
+                                'data': {
+                                    group_id:this.group_id,
+                                    msg_id: this.last_id,
+                                    type: 2,
+                                    limit:1000,
+                                    msg_type:120,
+                                    current_user_id:this.current_user_id
+                                },
+                                'async': false,
+                                'dataType': 'json',
+                                'success':function(data)
+                                {
+                                    for (var i = data.data.data.length; i > 0; i--) {
+
+                                        /*如果这个日子不存在的话,那么增加一个日子*/
+                                        var timeStr = data.data.data[i-1].created_at.substr(5,5);
+                                        // console.log(timeStr)
+                                        if( _self.days.indexOf(timeStr) === -1)
+                                        {
+                                            _self.days.push(timeStr);
+                                            _self.pushList({'system':true,'time':timeStr});
+                                        }
+
+                                        _self.pushList(data.data.data[i - 1]);
+                                    }
+
+
+                                    //这里添加当前时间
+                                    _self.pushList({'system':true,'time':moment().format('MM-DD HH:mm')})
+
+
+
+                                    //把scroll定位到最后
+                                    _self.$nextTick(function(){
+                                        _self.$refs.chatMain.scrollTop = _self.$refs.chatMain.scrollHeight
+                                    })
+                                }
+                            }
+                        );
+                    },
+                    getImageUrl(url) {
+                        if (url) {
+                            url = url.replace("loc://", 'http://106.14.140.53:3881/');
+                        }
+                        return url;
+                    },
+                    newMessage()
+                    {
+                        // console.log(2)
+                        var _self = this;
+                        var type = this.last_id?1:'';
+                        // 阻塞查询
+                        $.ajax(
+                            {
+                                'url':this.host + '/api/chat_message',
+                                'type':'post',
+                                'data':{
+                                    group_id:this.group_id,
+                                    msg_id:this.last_id,
+                                    type:type,
+                                    msg_type:120,
+                                    current_user_id:this.current_user_id
+                                },
+                                'async':false,
+                                'dataType':'json',
+                                success:function(data)
+                                {
+                                    if( data.status )
+                                    {
+                                        if( type ) {
+                                            for (var i = data.data.data.length; i > 0; i--) {
+                                                if( data.data.data[i - 1].send_id && (_self.send_ids.indexOf(data.data.data[i - 1].send_id) !== -1))
+                                                {
+                                                    continue;
+                                                }
+                                                _self.pushList(data.data.data[i - 1]);
+                                            }
+                                        }else
+                                        {
+                                            _self.last_id = data.data;
+                                            // for (var i = 0,j = data.data.data.length; i < j; i++) {
+                                            //     _self.pushList(data.data.data[i]);
+                                            // }
+                                            _self.getHistoryMessage();
+                                        }
+                                    }
+                                }
+                            }
+                        );
+
+                        setTimeout(this.newMessage, 3000);
+                    },
+                    pushList(msgRecord)
+                    {
+                        this.list.push(msgRecord);
+                        if (this.last_id < msgRecord.id)
+                        {
+                            this.last_id = msgRecord.id
+                        }
+                    },
+                    sendMsg()
+                    {
+
+                        if( !this.send_content )
+                        {
+                            return;
+                        }
+
+                        var content = this.send_content;
+                        var send_id = this.current_user_id + '_' +Date.now().toString();
+                        this.send_content = '';
+                        this.send_ids.push(send_id);
+                        this.pushList({id:'','content':content,'user_id':this.current_user_id})
+
+                        /*发送消息*/
+                        $.ajax(
+                            {
+                                url: this.host + '/api/send-chat',
+                                data:{
+                                    group_id:this.group_id,
+                                    current_user_id:this.current_user_id,
+                                    content:content,
+                                    send_id:send_id,
+                                    msg_type:120
+                                },
+                                type:'post',
+                                dataType:'json',
+                                success:function(data)
+                                {
+                                    if( data.status )
+                                    {
+
+                                    }
+                                }
+                            }
+                        )
+                    },
+                    getGroupList()
+                    {
+                        var _self = this
+                        $.ajax(
+                            {
+                                url:'https://m.houseofprayers.net:19090' + '/api/self/group/memberList',
+                                type:'post',
+                                async:false,
+                                data:{
+                                    pageSize:10000,
+                                    groupId:this.group_id,
+                                    page:0,
+                                },
+                                beforeSend: function(xhr) {
+                                    xhr.setRequestHeader("Authorization", _self.token);
+                                },
+                                dataType:'json',
+                                dataFilter: function(data) {
+                                    if (data) {
+                                        var stringedJSON = data.replace(
+                                            /:\s*(\d{16,})/g,
+                                            ': "uniqueprefix$1"'
+                                        );
+                                        if (typeof stringedJSON !== 'string') {
+                                            return stringedJSON;
+                                        }
+                                        var str = stringedJSON.replace(/uniqueprefix/g, '');
+                                        return str;
+                                    } else {
+                                        return {};
+                                    }
+                                },
+                                success:function(data){
+                                    if( data.code == 200 )
+                                    {
+                                        _self.group = data.data;
+                                        /*循环处理*/
+                                        for( var i = 0, j = _self.group.length; i < j; i++ )
+                                        {
+                                            _self.group[i].head_img = _self.getImageUrl(_self.group[i].head_img)
+                                        }
+                                        console.log(_self.group)
+                                        setTimeout(_self.newMessage, 3000);
+                                    }
+                                }
+                            }
+                        );
+                    },
+                    imgByUserId(user_id){
+                        var target = _.where(this.group,{'id':user_id})[0];
+                        return target['head_img'];
+                    },
+                    nicknameByUserId(user_id)
+                    {
+                        var target = _.where(this.group,{'id':user_id})[0];
+                        return target['real_name'];
+                    },
+                    uploadImg(){
+                        this.$refs.filElem.dispatchEvent(new MouseEvent('click'))
+                    },
+                    getFile()
+                    {
+                        var _self = this;
+                        const inputFile = this.$refs.filElem.files[0];
+                        if(inputFile){
+                            if(inputFile.type !== 'image/jpeg' && inputFile.type !== 'image/png' && inputFile.type !== 'image/gif'){
+                                alert('不是有效的图片文件！');
+                                return;
+                            }
+
+                            var formElement = document.querySelector("#data-form");
+                            var formData = new FormData(formElement);
+
+                            $.ajax({
+                                url:this.host + '/api/api-cloud-img',
+                                data:formData,
+                                type:'post',
+                                contentType: false,
+                                processData: false,
+                                dataType:'json',
+                                success:function(data){
+                                    // if(data.status){
+                                    //     $('#img-show').attr('src',data.data.img_url);
+                                    // }
+
+
+                                    if( data.status )
+                                    {
+                                        var content = '<img src="'+data.data+'"/>';
+                                    }
+
+                                    console.log(content);
+                                    var send_id = _self.current_user_id + '_' +Date.now().toString();
+                                    _self.send_ids.push(send_id);
+                                    _self.pushList({id:'','content':content,'user_id':_self.current_user_id})
+
+                                    /*发送消息*/
+                                    $.ajax(
+                                        {
+                                            url: _self.host + '/api/send-chat',
+                                            data:{
+                                                group_id:_self.group_id,
+                                                current_user_id:_self.current_user_id,
+                                                content:content,
+                                                send_id:send_id,
+                                                msg_type:120
+                                            },
+                                            type:'post',
+                                            dataType:'json',
+                                            success:function(data)
+                                            {
+                                                if( data.status )
+                                                {
+
+                                                }
+                                            }
+                                        }
+                                    )
+
+                                },
+                                error:function(data)
+                                {
+                                    alert('网络异常');
+                                }
+                            });
+
+                            // uploadLogo(formData).then((res)=>{
+                            //     this.$refs.filElem.value = '';
+                            //     if( res.status == 1 )
+                            //     {
+                            //         this.logo_path = res.data;
+                            //         // this.logo = res.logo_url;
+                            //     }
+                            // })
+                        } else {
+                            return;
+                        }
+                    },
+                    showImg(item)
+                    {
+                        if( item.content.indexOf('<img') !== 0 )
+                        {
+                            return;
+                        }
+                        //TODO 去截取图片路径部分
+
+                        var srcReg = /src=[\'\"]?([^\'\"]*)[\'\"]?/i;
+                        var arr = item.content.match(srcReg);
+
+                        if( arr[1] )
+                        {
+                            this.show = true;
+                            this.images = [this.host + arr[1]];
+                        }
+                    }
+                },
+            computed:{
+                faceArr:function()
+                {
+                    var tmpArr = []
+                    for( var i =0; i < this.face_config.length; i++ )
+                    {
+                        tmpArr.push(this.face_config[i].title.substr(1).replace(']',''));
+                    }
+
+                    return tmpArr;
+                }
+            }
+        }
+    )
+
+
+</script>
+</body>
+</html>
