@@ -145,7 +145,7 @@
                         </div>
                         <div style="display: inline-block;vertical-align: middle;font-size: 0;width: 60%">
                             <form action="javascript:send();" style="height: 100%;">
-                                <input style="" class="send_box" type="text" placeholder="请输入" v-model="send_content"/>
+                                <input style="" class="send_box" type="text" placeholder="请输入" v-model="send_content" @focus="sendFocus"  @blur="blurIn3"/>
                             </form>
                         </div>
 
@@ -337,7 +337,8 @@
                     {'src':'../layer/images/face/71.gif','title':'[蛋糕]'},
                 ],
                 images:[],
-                show:false
+                show:false,
+                inputFocus:''
             },
             created:function () {
                 this.user_id = getQueryString('user_id'),
@@ -369,6 +370,23 @@
             },
             methods:
                 {
+                    sendFocus()
+                    {
+                        this.inputFocus = true;
+                        var _self = this;
+                        setTimeout(function () {
+                            if ( _self.inputFocus ) {
+                                window.scrollTo(0, document.body.scrollHeight)
+                            }
+                        },5000)
+                    },
+                    blurIn3()
+                    {
+                        this.inputFocus = false;
+                        setTimeout(function () {
+                            window.scrollTo(0, document.body.scrollHeight)
+                        },100)
+                    },
                     getHistoryMessage()
                     {
                         var _self = this;
