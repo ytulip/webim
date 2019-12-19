@@ -105,8 +105,8 @@
 <body>
 <div id="app" class="vue-dpn">
     <div id="wrapper">
-        <div style="width: 100%;height: 100%;box-sizing: border-box;padding-bottom: 50px;overflow: scroll;background: #F8F8F8;" ref="chatMain" @click="mainClick" class="chat-panel">
-            <ul style="padding: 0 12px;padding-bottom: 50px;">
+        <div style="width: 100%;height: 100%;box-sizing: border-box;padding-bottom: 50px;overflow-y: scroll;overflow-x:hidden;-webkit-overflow-scrolling: touch;background: #F8F8F8;" ref="chatMain" @click="mainClick" class="chat-panel">
+            <ul style="padding: 0 12px 50px 12px;box-sizing: border-box;">
                 <li v-for="(item,index) in list" v-bind:class="{'layim-chat-mine':(item.user_id == current_user_id),'layim-chat-system':item.system,'layim-chat-li':!item.system}">
                     <div class="layim-chat-user" v-if="!item.system">
                         <!--<img :src="current_user_avatar" v-if="item.user_id == current_user_id">-->
@@ -144,7 +144,7 @@
                             </span>
                         </div>
                         <div style="display: inline-block;vertical-align: middle;font-size: 0;width: 60%">
-                            <form action="javascript:void(0);" style="height: 100%;">
+                            <form action="javascript:send();" style="height: 100%;">
                                 <input style="" class="send_box" type="text" placeholder="请输入" v-model="send_content"/>
                             </form>
                         </div>
@@ -154,6 +154,13 @@
                 </div>
             </div>
         </div>
+
+        <!--复制功能-->
+        <input id="foo" value="" style="position: absolute;left: 0;right: 0;bottom: 0;z-index: 1">
+
+        <!-- Trigger -->
+        <button class="btn" data-clipboard-target="#foo" style="position: absolute;left: 0;right: 0;bottom: 0;z-index: 1">
+        </button>
     </div>
 
 
@@ -167,13 +174,6 @@
     >
     </van-image-preview>
 
-
-    <!--复制功能-->
-    <input id="foo" value="">
-
-    <!-- Trigger -->
-    <button class="btn" data-clipboard-target="#foo">
-    </button>
 
 </div>
 
@@ -190,9 +190,9 @@
 <script src="../js/clipboard.min.js"></script>
 <script>
 
-    document.body.addEventListener('touchmove', function (e) {
-        e.preventDefault();
-    }, {passive: false});
+    // document.body.addEventListener('touchmove', function (e) {
+    //     e.preventDefault();
+    // }, {passive: false});
 
     var vant = window.vant;
     // 注册组件
@@ -211,6 +211,10 @@
     clipboard.on('error', function(e) {
         // alert('复制失败');
     });
+
+    function send() {
+        bodyVue.sendMsg()
+    }
 
     /*加载动画*/
     function cAlert(msg)
@@ -240,7 +244,7 @@
         if (r != null) return unescape(r[2]); return null;
     }
 
-    new Vue(
+    var bodyVue = new Vue(
         {
             el:'#app',
             data:{
@@ -475,14 +479,19 @@
                                     if( data.status )
                                     {
                                         if( type ) {
+                                            var newMsgTotal = 0;
                                             for (var i = data.data.data.length; i > 0; i--) {
                                                 if( data.data.data[i - 1].send_id && (_self.send_ids.indexOf(data.data.data[i - 1].send_id) !== -1))
                                                 {
                                                     continue;
                                                 }
                                                 _self.pushList(data.data.data[i - 1]);
+                                                newMsgTotal++;
                                             }
-                                            scrollChatBottom();
+                                            if( newMsgTotal )
+                                            {
+                                                scrollChatBottom();
+                                            }
                                         }else
                                         {
                                             _self.last_id = data.data;
