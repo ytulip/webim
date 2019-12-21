@@ -190,6 +190,26 @@
 
     moment.locale("zh-cn");
 
+    var clipboard = new ClipboardJS('.btn');
+
+    clipboard.on('success', function(e) {
+        // alert('复制成功');
+        vant.Toast({ message: '复制成功', duration: 200});
+        e.clearSelection();
+    });
+
+    clipboard.on('error', function(e) {
+        // alert('复制失败');
+    });
+
+
+    function scrollChatBottom()
+    {
+        setTimeout(function () {
+            $('.chat-panel')[0].scrollTop = $('.chat-panel')[0].scrollHeight
+        },200)
+    }
+
     function getQueryString(name) {
         var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
         var r = window.location.search.substr(1).match(reg);
@@ -452,6 +472,7 @@
                                 {
                                     if( data.status )
                                     {
+                                        var newMsgTotal = 0;
                                         if( type ) {
                                             for (var i = data.data.data.length; i > 0; i--) {
                                                 if( data.data.data[i - 1].send_id && (_self.send_ids.indexOf(data.data.data[i - 1].send_id) !== -1))
@@ -459,6 +480,11 @@
                                                     continue;
                                                 }
                                                 _self.pushList(data.data.data[i - 1]);
+                                                newMsgTotal++;
+                                            }
+                                            if( newMsgTotal )
+                                            {
+                                                scrollChatBottom();
                                             }
                                         }else
                                         {
