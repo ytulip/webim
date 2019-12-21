@@ -196,7 +196,12 @@
         if (r != null) return unescape(r[2]); return null;
     }
 
-    new Vue(
+
+    function send() {
+        bodyVue.sendMsg()
+    }
+
+    var bodyVue = new Vue(
         {
             el:'#app',
             data:{
