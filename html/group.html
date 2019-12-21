@@ -13,6 +13,25 @@
 
 </head>
 <style>
+
+    html,body,#app{
+        height: 100%;
+    }
+
+    #app{
+        position: relative;
+    }
+
+    #wrapper
+    {
+        height: 100%;
+        width: 100%;
+        position: relative;
+        box-sizing: border-box;
+        background: rgb(252, 252, 252);
+        overflow: hidden;
+    }
+
     .vue-dpn
     {
         display: none;
@@ -48,39 +67,103 @@
     .layim-chat-mine .layim-chat-user cite {
         right:0;
     }
+
+    .van-toast
+    {
+        z-index: 9999999999 !important;
+    }
+
+    .send_box{
+        display: block;
+        width: 100%;
+        font-size: 13px;
+        line-height: 20px;
+        padding: 10px 10px;
+        outline: 0px;
+        background: rgb(255, 255, 255);
+        border-width: initial;
+        border-style: none;
+        border-color: initial;
+        border-image: initial;
+    }
+
+    .layim-chat-li
+    {
+        position: relative;
+    }
+
+    .layim-chat-mine
+    {
+        text-align: right;
+    }
+
+    .layim-chat-system
+    {
+        text-align: center;
+    }
 </style>
 <body>
 
 <div id="app" class="vue-dpn">
-    <div id="layui-m-layer1" class="layui-m-layer layui-m-layer1" index="1">
-        <div class="layui-m-layermain">
-            <div class="layui-m-layersection"><div class="layui-m-layerchild  layui-m-anim--1"><div class="layui-m-layercont"><div class="layim-panel layui-m-anim-left">
-                <!--            <div class="layim-title" style="background-color: #36373C;"><p><i class="layui-icon layim-chat-back" layim-event="back"></i>薛凌霄<span class="layim-chat-status"></span></p></div>-->
-                <div class="layui-unselect layim-content"><div class="layim-chat layim-chat-friend">
-                    <div class="layim-chat-main" ref="chatMain" @click="mainClick">
-                        <ul>
+    <div id="wrapper">
+        <div style="width: 100%;height: 100%;box-sizing: border-box;padding-bottom: 50px;overflow-y: scroll;overflow-x:hidden;-webkit-overflow-scrolling: touch;background: #F8F8F8;" ref="chatMain" @click="mainClick" class="chat-panel">
+            <ul style="padding: 0 12px 50px 12px;box-sizing: border-box;">
+                <li v-for="(item,index) in list" v-bind:class="{'layim-chat-mine':(item.user_id == current_user_id),'layim-chat-system':item.system,'layim-chat-li':!item.system}">
+                    <div class="layim-chat-user" v-if="!item.system">
+                        <!--<img :src="current_user_avatar" v-if="item.user_id == current_user_id">-->
+                        <!--<img :src="user_avatar" v-else>-->
+                        <cite v-if="item.user_id == current_user_id">{{current_nickname}}</cite>
+                        <cite v-else>{{nickname}}</cite>
+                    </div>
+                    <div class="layim-chat-text" v-if="!item.system" v-html="parseContent(item.content)" @click="showImg(item)"></div>
+                    <span v-if="item.system">{{item.time}}</span>
+                </li>
+            </ul>
 
-                            <li v-for="(item,index) in list" v-bind:class="{'layim-chat-mine':(item.user_id == current_user_id),'layim-chat-system':item.system,'layim-chat-li':!item.system}">
-                                <div class="layim-chat-user" v-if="!item.system">
-                                    <!--<img :src="imgByUserId(item.user_id)">-->
-                                    <cite>{{nicknameByUserId(item.user_id)}}</cite>
-                                </div>
-                                <div class="layim-chat-text" v-if="!item.system" v-html="parseContent(item.content)" @click="showImg(item)"></div>
-                                <span v-if="item.system">{{item.time}}</span>
-                            </li>
+        </div>
+
+        <div style="width: 100%;position: absolute;left: 0px;right: 0px;bottom: 55px;z-index: 100;background-color: #ffffff;" v-if="face_layer">
+            <ul class="layui-layim-face" >
+
+                <li v-for="(item,index) in face_config" :title="item.title" @click="addFace(item)"><img :src="item.src"/></li>
+
+            </ul>
+        </div>
 
 
-                        </ul></div>
+        <div style="width: 100%;position: absolute;left: 0px;right: 0px;bottom: 0px;z-index: 99;">
+            <div style="width: 100%; height: 50px;background: rgb(252, 252, 252);">
+                <div style="height: 100%; width: 100%;position: relative;box-sizing: border-box;border-top: 1px solid rgb(237, 237, 237);">
+                    <div style="position: relative;height: 50px;box-sizing: border-box;display: flex;flex-direction: row;padding: 5px 10px 5px 14px;font-size:0;">
+                        <div style="display: inline-block;vertical-align: middle;width: 25%;">
+                            <span @click="chosenFace">
+                            <van-icon name="smile-o" size="16" :style="{'margin-left':'12px', 'line-height':'40px'}"/>
+                            </span>
 
-                    <div class="layim-chat-footer"><div class="layim-chat-send"><input type="text" autocomplete="off" v-model="send_content"><button class="layim-send" v-bind:class="{'layui-disabled':!send_content}" @click="sendMsg">发送</button></div>
-                        <div class="layim-chat-tool" data-json="%7B%22username%22%3A%22%E8%96%9B%E5%87%8C%E9%9C%84%22%2C%22avatar%22%3A%22https%3A%2F%2Fhuajialife.com%2Fimages%2Fheader2.jpg%22%2C%22id%22%3A2%2C%22type%22%3A%22friend%22%2C%22content%22%3A%221%E7%82%B9%E5%87%86%E5%A4%87%E7%9D%A1%E4%BA%86%22%2C%22mine%22%3Afalse%2C%22timestamp%22%3A1565023914%2C%22name%22%3A%22%E8%96%9B%E5%87%8C%E9%9C%84%22%2C%22historyTime%22%3A1565023914087%2C%22sign%22%3A%221%E7%82%B9%E5%87%86%E5%A4%87%E7%9D%A1%E4%BA%86%22%7D"><span class="layui-icon layim-tool-face" title="选择表情" v-on:click="chosenFace"></span><img style="display: inline-block;height: 26px;vertical-align: middle;" src="../image/picture.png" @click="uploadImg"/>
+                            <span style="margin-left: 12px;" @click="uploadImg">
+                            <van-icon name="photo-o" size="16" :style="{'margin-left':'12px', 'line-height':'40px'}"/>
+                            </span>
                         </div>
-                    </div></div></div></div></div></div></div></div>
+                        <div style="display: inline-block;vertical-align: middle;font-size: 0;width: 60%">
+                            <form action="javascript:send();" style="height: 100%;">
+                                <input style="" class="send_box" type="text" placeholder="请输入" v-model="send_content" @focus="sendFocus"  @blur="blurIn3"/>
+                            </form>
+                        </div>
+
+                        <div style="line-height: 40px;display: inline-block;font-size: 12px;width: 15%;text-align: center;" @click="sendMsg"><span style="color: rgb(25,127,250)">发送</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--复制功能-->
+        <input id="foo" value="" style="position: absolute;left: 0;right: 0;bottom: 0;z-index: 1">
+
+        <!-- Trigger -->
+        <button class="btn" data-clipboard-target="#foo" style="position: absolute;left: 0;right: 0;bottom: 0;z-index: 1">
+        </button>
     </div>
 
-    <div id="layui-m-layer6" class="layui-m-layer layui-m-layer1" index="6" v-if="face_layer"><div class="layui-m-layermain"><div class="layui-m-layersection"><div class="layui-m-layerchild layim-layer layui-m-anim-scale"><div class="layui-m-layercont"><ul class="layui-layim-face">
-        <li v-for="(item,index) in face_config" :title="item.title" @click="addFace(item)"><img :src="item.src"/></li>
-    </ul></div></div></div></div></div>
 
     <form style="display: none;" id="data-form">
         <input id="fileTarget" ref="filElem" type="file" name="file"  style="display: none" accept="image/gif,image/jpeg,image/png"  @change="getFile"/>
@@ -91,6 +174,7 @@
             :images="images"
     >
     </van-image-preview>
+
 
 </div>
 
@@ -208,9 +292,9 @@
             },
             created:function () {
                 this.group_id = getQueryString('group_id'),
-                this.current_user_id = getQueryString('current_user_id'),
-                this.user_avatar = getQueryString('user_avatar'),
-                this.current_user_avatar = getQueryString('current_user_avatar')
+                    this.current_user_id = getQueryString('current_user_id'),
+                    this.user_avatar = getQueryString('user_avatar'),
+                    this.current_user_avatar = getQueryString('current_user_avatar')
                 this.token = getQueryString('token')
 
 
@@ -233,6 +317,23 @@
             },
             methods:
                 {
+                    sendFocus()
+                    {
+                        this.inputFocus = true;
+                        var _self = this;
+                        setTimeout(function () {
+                            if ( _self.inputFocus ) {
+                                window.scrollTo(0, document.body.scrollHeight)
+                            }
+                        },5000)
+                    },
+                    blurIn3()
+                    {
+                        this.inputFocus = false;
+                        setTimeout(function () {
+                            window.scrollTo(0, document.body.scrollHeight)
+                        },100)
+                    },
                     parseContent(content)
                     {
                         //如果是图片那么特殊处理

@@ -317,6 +317,23 @@
             },
             methods:
                 {
+                    sendFocus()
+                    {
+                        this.inputFocus = true;
+                        var _self = this;
+                        setTimeout(function () {
+                            if ( _self.inputFocus ) {
+                                window.scrollTo(0, document.body.scrollHeight)
+                            }
+                        },5000)
+                    },
+                    blurIn3()
+                    {
+                        this.inputFocus = false;
+                        setTimeout(function () {
+                            window.scrollTo(0, document.body.scrollHeight)
+                        },100)
+                    },
                     parseContent(content)
                     {
                         //如果是图片那么特殊处理
