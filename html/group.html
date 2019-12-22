@@ -108,12 +108,20 @@
     <div id="wrapper">
         <div style="width: 100%;height: 100%;box-sizing: border-box;padding-bottom: 50px;overflow-y: scroll;overflow-x:hidden;-webkit-overflow-scrolling: touch;background: #F8F8F8;" ref="chatMain" @click="mainClick" class="chat-panel">
             <ul style="padding: 0 12px 50px 12px;box-sizing: border-box;">
+                <!--<li v-for="(item,index) in list" v-bind:class="{'layim-chat-mine':(item.user_id == current_user_id),'layim-chat-system':item.system,'layim-chat-li':!item.system}">-->
+                    <!--<div class="layim-chat-user" v-if="!item.system">-->
+                        <!--&lt;!&ndash;<img :src="current_user_avatar" v-if="item.user_id == current_user_id">&ndash;&gt;-->
+                        <!--&lt;!&ndash;<img :src="user_avatar" v-else>&ndash;&gt;-->
+                        <!--<cite v-if="item.user_id == current_user_id">{{current_nickname}}</cite>-->
+                        <!--<cite v-else>{{nickname}}</cite>-->
+                    <!--</div>-->
+                    <!--<div class="layim-chat-text" v-if="!item.system" v-html="parseContent(item.content)" @click="showImg(item)"></div>-->
+                    <!--<span v-if="item.system">{{item.time}}</span>-->
+                <!--</li>-->
                 <li v-for="(item,index) in list" v-bind:class="{'layim-chat-mine':(item.user_id == current_user_id),'layim-chat-system':item.system,'layim-chat-li':!item.system}">
                     <div class="layim-chat-user" v-if="!item.system">
-                        <!--<img :src="current_user_avatar" v-if="item.user_id == current_user_id">-->
-                        <!--<img :src="user_avatar" v-else>-->
-                        <cite v-if="item.user_id == current_user_id">{{current_nickname}}</cite>
-                        <cite v-else>{{nickname}}</cite>
+                        <!--<img :src="imgByUserId(item.user_id)">-->
+                        <cite>{{nicknameByUserId(item.user_id)}}</cite>
                     </div>
                     <div class="layim-chat-text" v-if="!item.system" v-html="parseContent(item.content)" @click="showImg(item)"></div>
                     <span v-if="item.system">{{item.time}}</span>
@@ -523,7 +531,8 @@
                         this.send_content = '';
                         this.send_ids.push(send_id);
                         this.pushList({id:'','content':content,'user_id':this.current_user_id})
-
+                        scrollChatBottom();
+                        
                         /*发送消息*/
                         $.ajax(
                             {
@@ -602,7 +611,13 @@
                     nicknameByUserId(user_id)
                     {
                         var target = _.where(this.group,{'id':user_id})[0];
-                        return target['real_name'];
+                        if( target )
+                        {
+                            return target['real_name'];
+                        } else
+                        {
+                            return '';
+                        }
                     },
                     uploadImg(){
                         this.$refs.filElem.dispatchEvent(new MouseEvent('click'))
