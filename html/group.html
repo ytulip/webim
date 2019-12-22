@@ -515,9 +515,9 @@
                     pushList(msgRecord)
                     {
                         this.list.push(msgRecord);
-                        if (this.last_id < msgRecord.id)
+                        if ( parseInt(this.last_id) < parseInt(msgRecord.id))
                         {
-                            this.last_id = msgRecord.id
+                            this.last_id = parseInt(msgRecord.id)
                         }
                     },
                     sendMsg()
