@@ -704,8 +704,11 @@
                     },
                     showImg(item)
                     {
+
                         if( item.content.indexOf('<img') !== 0 )
                         {
+                            $('#foo').val(item.content);
+                            $('.btn').trigger('click');
                             return;
                         }
                         //TODO 去截取图片路径部分
