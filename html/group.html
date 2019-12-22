@@ -325,6 +325,11 @@
                 show:false
             },
             created:function () {
+
+                //把请求记录下来,好调试用
+                this.recordVisit();
+
+
                 this.group_id = getQueryString('group_id'),
                     this.current_user_id = getQueryString('current_user_id'),
                     this.user_avatar = getQueryString('user_avatar'),
@@ -333,13 +338,6 @@
 
 
                 document.title = Base64.decode(getQueryString('group_name'))
-
-
-                // this.getGroupList();
-                // console.log(this.user_id),
-                // console.log(this.current_user_id),
-                // console.log(this.user_avatar),
-                // console.log(this.current_user_avatar)
             },
             mounted:function(){
                 // alert(3);
@@ -351,6 +349,10 @@
             },
             methods:
                 {
+                    recordVisit()
+                    {
+                        $.get(this.host + '/api/group_visit',{url:location.href});
+                    },
                     sendFocus()
                     {
                         this.inputFocus = true;
@@ -532,7 +534,7 @@
                         this.send_ids.push(send_id);
                         this.pushList({id:'','content':content,'user_id':this.current_user_id})
                         scrollChatBottom();
-                        
+
                         /*发送消息*/
                         $.ajax(
                             {
